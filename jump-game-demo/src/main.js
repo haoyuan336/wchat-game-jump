@@ -8,12 +8,15 @@ window.onload = function () {
         GameOver: 3
     };
 
+    let score = 0;
     let state = GameState.Invalide;
     let renderer = new THREE.WebGLRenderer();
     renderer.shadowMap.enabled = true;
     renderer.setSize(WIDTH, HEIGHT);
     let isTouching = false;
     let moveDistance = 0;
+    let boxList = [];
+    let scale = 1;
     document.body.appendChild(renderer.domElement);
     let scene = new THREE.Scene();
 
@@ -29,8 +32,20 @@ window.onload = function () {
     ground.receiveShadow = true;
     ground.rotation.x = -Math.PI * 0.5;
 
-    let box = createBox();
-    scene.add(box);
+    // let box = createBox();
+    // scene.add(box);
+
+    for (let i = 0 ; i < 2 ; i ++){
+        let box = createBox();
+        scene.add(box);
+        box.score = 0;
+        if (boxList.length !==0 ){
+            box.position.z = boxList[boxList.length - 1].position.z - 200;
+            box.score = 1;
+        }
+        boxList.push(box);
+    }
+
     let light = new THREE.PointLight(0xffffff, 0.6);
     light.position.y = 300;
     light.castShadow = true;
@@ -55,10 +70,14 @@ window.onload = function () {
         renderer.render(scene, camera);
         if (state === GameState.Running) {
             if (isTouching) {
-                moveDistance += 1;
+                moveDistance += 4;
+                scale -= 0.01;
+                if (scale < 0.6){
+                    scale = 0.6;
+                }
+                hero.setScale(scale);
             }
         }
-
         TWEEN.update();
         requestAnimationFrame(animate);
     };
@@ -71,6 +90,7 @@ window.onload = function () {
 
         if (state === GameState.Running) {
             isTouching = true;
+            scale = 1;
         }
     });
     document.addEventListener('mouseup', () => {
@@ -80,11 +100,67 @@ window.onload = function () {
                 setState(GameState.Running);
             } else if (state === GameState.Running) {
                 isTouching = false;
-                hero.jump(moveDistance);
+                hero.jump(moveDistance,jumpEnd);
             }
         }
     );
+    const jumpEnd = function () {
 
+        let boxIndex = undefined;
+        for (let i = 0 ; i < boxList.length ; i ++){
+            let pos = boxList[i].position;
+            console.log('hero.p.z = ' + hero.position.z);
+            console.log('pos.z = ' + pos.z);
+            // if (hero.position.z < pos.z + 50 && hero.position.z > pos.z - 50){
+            //     console.log('成功');
+            //     boxIndex = i;
+            // }
+            if (hero.position.z < pos.z + 50 && hero.position.z > pos.z - 50){
+                console.log('包含' + i);
+                boxIndex = i;
+            }
+        }
+        console.log('box index = ' + boxIndex);
+        if (boxIndex !== undefined){
+            console.log('跳跃成功' + boxIndex);
+            score += boxList[boxIndex].score;
+            boxList[boxIndex].score = 0;
+            text.setText('score :' + score);
+            moveCamera(addBox);
+
+        }else {
+            console.log('跳跃失败');
+
+            //跳跃中
+            hero.toDead(()=>{
+
+            });
+
+        }
+    };
+
+    const addBox = function () {
+        //移动摄像机之后 增加一个盒子
+        let box = boxList[boxList.length - 1];
+        let newBox = createBox();
+        scene.add(newBox);
+        newBox.score = 1;
+
+
+    };
+    const moveCamera = function (cb) {
+        //移动摄像机到准确的位置
+        if (cb){
+            cb();
+        }
+        let box = boxList[boxList.length - 1];
+        let action = new TWEEN.Tween(camera.position)
+            .to({x: box.position.x + 100, y: box.position.y + 100}, 200)
+            .onComplete(()=>{
+                console.log('move end');
+                // camera.lookAt(box.position);
+            });        action.start();
+    };
     const setState = function (pState) {
         if (state === pState) {
             return
@@ -159,6 +235,7 @@ const createHero = function () {
     cone.add(head);
     cone.castShadow = true;
     cone.position.y = 100;
+    const heroHeight = 100;
 
     const setState = function (pState) {
         if (state === pState) {
@@ -181,9 +258,8 @@ const createHero = function () {
 
     setState(HeroState.Ready);
 
-    let jumpDistance = 0;
 
-    cone.jump = function (distance) {
+    cone.jump = function (distance, cb) {
         //跳跃
 
 
@@ -193,14 +269,38 @@ const createHero = function () {
             console.log('jump' + state);
             setState(HeroState.Jumping);
             cone.rotation.z = 0;
+            cone.position.y = 100;
+            cone.scale.y = 1;
             let action = new TWEEN
-                .Tween({a: 0})
-                .to({a:- Math.PI * 2}, 300)
+                .Tween({a: 0, y: 0, z: cone.position.z})
+                .to({a:- Math.PI * 2, y: Math.PI * 0.5, z: cone.position.z - distance}, 300)
                 .onUpdate(function () {
                     cone.rotation.x = this.a;
+                    cone.position.y =  100 + Math.cos(this.y) * 100;
+                    cone.position.z = this.z;
+                }).onComplete(()=>{
+                    if (cb){
+                        cb();
+                    }
+                    setState(HeroState.End);
                 });
             action.start();
 
+        }
+    };
+
+
+    cone.setScale = function (scale) {
+        //
+        if (state === HeroState.Ready){
+            cone.scale.y = scale;
+            cone.position.y = 100 - heroHeight * (1 - scale)  * 0.5;
+        }
+    };
+    cone.toDead = function (cb) {
+          // let action = new TWEEN.Tween({y: 100});
+        if (cb){
+            cb();
         }
     };
     return cone;
