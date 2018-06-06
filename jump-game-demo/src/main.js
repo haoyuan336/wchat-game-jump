@@ -55,16 +55,24 @@ window.onload = function () {
     let aLight = new THREE.AmbientLight(0xffffff, 0.4);
     scene.add(aLight);
 
+    //
+    // let text = createText('Are you ready?');
+    // scene.add(text);
+    // text.position.z = 100;
+    // text.position.x = 100;
+    // text.position.y = 100;
+    // text.lookAt(camera.position);
 
-    let text = createText('Are you ready?');
-    scene.add(text);
-    text.position.z = 100;
-    text.position.x = 100;
-    text.position.y = 100;
-    text.lookAt(camera.position);
     let hero = createHero();
     scene.add(hero);
 
+
+    let sprite = createSprite('./images/apple_0.png');
+    scene.add(sprite);
+
+    sprite.position.x = 400;
+    sprite.position.y = 200;
+    sprite.position.z = 100;
 
     let animate = function () {
         renderer.render(scene, camera);
@@ -82,7 +90,7 @@ window.onload = function () {
         requestAnimationFrame(animate);
     };
     animate();
-    text.setText('click start game');
+    // text.setText('click start game');
 
 
     document.addEventListener('mousedown', () => {
@@ -125,7 +133,6 @@ window.onload = function () {
             console.log('跳跃成功' + boxIndex);
             score += boxList[boxIndex].score;
             boxList[boxIndex].score = 0;
-            text.setText('score :' + score);
             moveCamera(addBox);
 
         }else {
@@ -168,10 +175,8 @@ window.onload = function () {
         switch (pState) {
             case GameState.Ready:
                 console.log('进入准备状态');
-                text.setText('Click Start Game');
                 break;
             case GameState.Running:
-                text.setText('');
                 break;
             case GameState.GameOver:
                 break;
@@ -185,30 +190,39 @@ window.onload = function () {
 
 
 };
+const createSprite = function (resPath) {
+    //加一个精灵
+    console.log('create sprite with  ' + resPath);
 
+    let spriteMap = new THREE.TextureLoader().load(resPath);
+    let spriteMaterial = new THREE.SpriteMaterial({map: spriteMap, color: 0xffffff});
+    let sprite = new THREE.Sprite(spriteMaterial);
+    return sprite;
+};
 const createText = function (text) {
-    let canvas = document.createElement('Canvas');
-    canvas.width = 1024;
-    canvas.height = 512;
-    let bitmap = canvas.getContext('2d');
-    bitmap.font = 'Normal 40px Arial';
-    bitmap.textAlign = 'center';
-    bitmap.fillStyle = 'rgba(255,255,255,0.75)';
-    bitmap.fillText(text, WIDTH / 2, HEIGHT / 2);
-    let texture = new THREE.Texture(canvas);
-    texture.needsUpdate = true;
-    let material = new THREE.MeshBasicMaterial({map: texture});
-    material.transparent = true;
-    let planeGeometry = new THREE.PlaneGeometry(WIDTH, HEIGHT);
-    let plane = new THREE.Mesh(planeGeometry, material);
-
-    // plane.rotation.y =  Math.PI * 0.5;
-    plane.setText = function (text) {
-        bitmap.clearRect(0, 0, WIDTH, HEIGHT);
-        bitmap.fillText(text, WIDTH / 2, HEIGHT / 2);
-        texture.needsUpdate = true;
-    };
-    return plane;
+    // let canvas = document.createElement('Canvas');
+    // canvas.width = 1024;
+    // canvas.height = 512;
+    // let bitmap = canvas.getContext('2d');
+    // bitmap.font = 'Normal 40px Arial';
+    // bitmap.textAlign = 'center';
+    // bitmap.fillStyle = 'rgba(255,255,255,0.75)';
+    // bitmap.fillText(text, WIDTH / 2, HEIGHT / 2);
+    // let texture = new THREE.Texture(canvas);
+    // texture.needsUpdate = true;
+    // let material = new THREE.MeshBasicMaterial({map: texture});
+    // material.transparent = true;
+    // // let planeGeometry = new THREE.PlaneGeometry(WIDTH, HEIGHT);
+    // // let plane = new THREE.Mesh(planeGeometry, material);
+    // let plane = new THREE.Sprite(material);
+    //
+    // // plane.rotation.y =  Math.PI * 0.5;
+    // plane.setText = function (text) {
+    //     bitmap.clearRect(0, 0, WIDTH, HEIGHT);
+    //     bitmap.fillText(text, WIDTH / 2, HEIGHT / 2);
+    //     texture.needsUpdate = true;
+    // };
+    // return plane;
 
     // let
 };
