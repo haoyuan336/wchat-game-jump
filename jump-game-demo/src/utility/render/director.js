@@ -20,8 +20,6 @@ const Director = function () {
             _renderer.render(_runningWorld.scene, _camera);
             _runningWorld.update(dt);
         }
-
-
         requestAnimationFrame(animate);
     };
     animate();
@@ -42,6 +40,16 @@ const Director = function () {
             return _camera
         }
     });
+
+    that.setCameraPosition = function (x,y,z) {
+        _camera.position.x = x;
+        _camera.position.y = y;
+        _camera.position.z = z;
+    };
+    that.setCameraLookAt = function (pos) {
+        _camera.lookAt(pos);
+    };
+
     return that;
 };
 

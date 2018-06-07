@@ -8930,7 +8930,7 @@
 	Object.defineProperty(exports, "__esModule", {
 	    value: true
 	});
-	exports.TextSprite = exports.BaseScene = exports.Director = undefined;
+	exports.BaseBox = exports.TextSprite = exports.BaseScene = exports.Director = undefined;
 	
 	var _director = __webpack_require__(329);
 	
@@ -8944,11 +8944,16 @@
 	
 	var _textSprite2 = _interopRequireDefault(_textSprite);
 	
+	var _baseBox = __webpack_require__(333);
+	
+	var _baseBox2 = _interopRequireDefault(_baseBox);
+	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
 	exports.Director = _director2.default;
 	exports.BaseScene = _baseScene2.default;
 	exports.TextSprite = _textSprite2.default;
+	exports.BaseBox = _baseBox2.default;
 
 /***/ },
 /* 329 */
@@ -8981,7 +8986,6 @@
 	            _renderer.render(_runningWorld.scene, _camera);
 	            _runningWorld.update(dt);
 	        }
-	
 	        requestAnimationFrame(animate);
 	    };
 	    animate();
@@ -9002,6 +9006,16 @@
 	            return _camera;
 	        }
 	    });
+	
+	    that.setCameraPosition = function (x, y, z) {
+	        _camera.position.x = x;
+	        _camera.position.y = y;
+	        _camera.position.z = z;
+	    };
+	    that.setCameraLookAt = function (pos) {
+	        _camera.lookAt(pos);
+	    };
+	
 	    return that;
 	};
 	
@@ -9056,7 +9070,21 @@
 	    that.scene = new THREE.Scene();
 	    var _tipsText = (0, _import.TextSprite)('Hello World');
 	    that.scene.add(_tipsText);
+	    _tipsText.position.y = 400;
 	
+	    var _light = new THREE.PointLight(0xffffff, 2);
+	    that.scene.add(_light);
+	    _light.position.y = 200;
+	
+	    var box = (0, _import.BaseBox)(100, 100, 100);
+	    that.scene.add(box);
+	
+	    var box2 = (0, _import.BaseBox)(100, 100, 100, new THREE.MeshLambertMaterial({ color: 0xff00ff }));
+	    that.scene.add(box2);
+	
+	    box2.position.y = 120;
+	
+	    _import.Director.shareDirector().setCameraPosition(200, 200, 200);
 	    that.update = function (dt) {};
 	    return that;
 	};
@@ -9097,6 +9125,29 @@
 	    return that;
 	}
 	exports.default = TextSprite;
+
+/***/ },
+/* 333 */
+/***/ function(module, exports) {
+
+	"use strict";
+	
+	Object.defineProperty(exports, "__esModule", {
+	    value: true
+	});
+	function BaseBox(s1, s2, s3, material) {
+	    var box = new THREE.BoxGeometry(s1, s2, s3);
+	    var _material = undefined;
+	    if (material) {
+	        // let _material = new THREE.MeshNormalMaterial({color: 0xff00ff});
+	        _material = material;
+	    } else {
+	        _material = new THREE.MeshNormalMaterial({ color: 0xff00ff });
+	    }
+	    var that = new THREE.Mesh(box, _material);
+	    return that;
+	}
+	exports.default = BaseBox;
 
 /***/ }
 /******/ ]);
