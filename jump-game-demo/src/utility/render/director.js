@@ -8,7 +8,8 @@ const Director = function () {
     document.body.appendChild(_renderer.domElement);
     _renderer.setSize(_width, _height);
     let _runningWorld = undefined;
-    let _camera = new THREE.Camera();
+    let _camera = new THREE.OrthographicCamera(_width/2 * -1 , _width/2 , _height / 2, _height/2 * -1);
+    _camera.position.y = 100;
     let _currentTime = new Date().getTime();
     let animate = function(){
 
@@ -27,6 +28,7 @@ const Director = function () {
 
     that.startWorld = function(world){
         _runningWorld = world;
+        _camera.lookAt(world.scene.position);
     };
 
     window.addEventListener('resize', ()=>{

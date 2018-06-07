@@ -8969,7 +8969,8 @@
 	    document.body.appendChild(_renderer.domElement);
 	    _renderer.setSize(_width, _height);
 	    var _runningWorld = undefined;
-	    var _camera = new THREE.Camera();
+	    var _camera = new THREE.OrthographicCamera(_width / 2 * -1, _width / 2, _height / 2, _height / 2 * -1);
+	    _camera.position.y = 100;
 	    var _currentTime = new Date().getTime();
 	    var animate = function animate() {
 	
@@ -8987,6 +8988,7 @@
 	
 	    that.startWorld = function (world) {
 	        _runningWorld = world;
+	        _camera.lookAt(world.scene.position);
 	    };
 	
 	    window.addEventListener('resize', function () {
@@ -9090,6 +9092,7 @@
 	        bitmap.fillText(text, _canvas.width / 2, _canvas.height);
 	        _texture.needsUpdate = true;
 	    };
+	    that.scale.set(500, 500, 500);
 	
 	    return that;
 	}
