@@ -5,10 +5,11 @@ const Director = function () {
     let _width = window.innerWidth;
     let _height = window.innerHeight;
     let _renderer = new THREE.WebGLRenderer();
+    _renderer.shadowMap.enabled = true;
     document.body.appendChild(_renderer.domElement);
     _renderer.setSize(_width, _height);
     let _runningWorld = undefined;
-    let _camera = new THREE.OrthographicCamera(_width/2 * -1 , _width/2 , _height / 2, _height/2 * -1);
+    let _camera = new THREE.OrthographicCamera(_width/2 * -1 , _width/2 , _height / 2, _height/2 * -1, -1000, 10000);
     _camera.position.y = 100;
     let _currentTime = new Date().getTime();
     let animate = function(){

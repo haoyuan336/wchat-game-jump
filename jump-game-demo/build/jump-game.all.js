@@ -8976,10 +8976,11 @@
 	    var _width = window.innerWidth;
 	    var _height = window.innerHeight;
 	    var _renderer = new THREE.WebGLRenderer();
+	    _renderer.shadowMap.enabled = true;
 	    document.body.appendChild(_renderer.domElement);
 	    _renderer.setSize(_width, _height);
 	    var _runningWorld = undefined;
-	    var _camera = new THREE.OrthographicCamera(_width / 2 * -1, _width / 2, _height / 2, _height / 2 * -1);
+	    var _camera = new THREE.OrthographicCamera(_width / 2 * -1, _width / 2, _height / 2, _height / 2 * -1, -1000, 10000);
 	    _camera.position.y = 100;
 	    var _currentTime = new Date().getTime();
 	    var animate = function animate() {
@@ -9070,34 +9071,81 @@
 	
 	var _import = __webpack_require__(328);
 	
+	var _hero2 = __webpack_require__(335);
+	
+	var _hero3 = _interopRequireDefault(_hero2);
+	
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+	
+	var GameState = {
+	    Invalide: -1,
+	    Ready: 2,
+	    Running: 3,
+	    GameOver: 4
+	};
 	function GameWorld() {
 	    var that = {};
 	    that.scene = new THREE.Scene();
 	    var _tipsText = (0, _import.TextSprite)('Hello World');
 	    that.scene.add(_tipsText);
 	    _tipsText.position.y = 400;
+	    var _state = GameState.Invalide;
 	
-	    var _light = new THREE.PointLight(0xffffff, 2);
+	    var _light = new THREE.PointLight(0xffffff, 0.8);
+	    _light.castShadow = true;
 	    that.scene.add(_light);
-	    _light.position.y = 200;
+	    _light.position.y = 300;
+	    _light.position.z = -300;
+	    _light.position.x = 300;
 	
-	    var _aLight = new THREE.AmbientLight(0xffffff, 0.5);
+	    var _aLight = new THREE.AmbientLight(0xffffff, 0.4);
 	    that.scene.add(_aLight);
 	
-	    var _plane = (0, _import.BasePlane)(100, 100);
+	    var _plane = (0, _import.BasePlane)(1000, 1000);
+	    _plane.receiveShadow = true;
 	    that.scene.add(_plane);
-	    _plane.rotation;
+	    _plane.position.y = -25;
+	    _plane.rotation.x = -Math.PI * 0.5;
 	
-	    var box = (0, _import.BaseBox)(100, 100, 100);
+	    var box = (0, _import.BaseBox)(100, 50, 100, { color: 0xff00ff });
+	    box.castShadow = true;
+	    box.receiveShadow = true;
 	    that.scene.add(box);
 	
-	    var box2 = (0, _import.BaseBox)(100, 100, 100, new THREE.MeshLambertMaterial({ color: 0xff00ff }));
-	    that.scene.add(box2);
-	
-	    box2.position.y = 120;
-	
+	    var _hero = (0, _hero3.default)();
+	    that.scene.add(_hero);
+	    _hero.position.y = 60;
 	    _import.Director.shareDirector().setCameraPosition(200, 200, 200);
 	    that.update = function (dt) {};
+	
+	    window.addEventListener('mousedown', function () {
+	        console.log('mouse down');
+	    });
+	    window.addEventListener('mouseup', function () {
+	        console.log('mouse up');
+	    });
+	
+	    var setState = function setState(state) {
+	        if (_state === state) {
+	            return;
+	        }
+	        switch (state) {
+	            case GameState.Ready:
+	                //准备阶段
+	                if (_hero) {
+	                    _hero.toReady();
+	                }
+	
+	                break;
+	            case GameState.Running:
+	                break;
+	            case GameState.GameOver:
+	                break;
+	        }
+	    };
+	
+	    setState(GameState.Ready);
+	
 	    return that;
 	};
 	exports.default = GameWorld;
@@ -9147,18 +9195,13 @@
 	Object.defineProperty(exports, "__esModule", {
 	    value: true
 	});
-	function BaseBox(s1, s2, s3, material) {
+	function BaseBox(s1, s2, s3, option) {
 	    var box = new THREE.BoxGeometry(s1, s2, s3);
-	    var _material = undefined;
-	    if (material) {
-	        // let _material = new THREE.MeshNormalMaterial({color: 0xff00ff});
-	        _material = material;
-	    } else {
-	        _material = new THREE.MeshNormalMaterial({ color: 0xff00ff });
-	    }
+	    var _material = new THREE.MeshLambertMaterial(option);
 	    var that = new THREE.Mesh(box, _material);
 	    return that;
 	}
+	
 	exports.default = BaseBox;
 
 /***/ },
@@ -9171,10 +9214,37 @@
 	    value: true
 	});
 	var BasePlane = function BasePlane(width, height) {
-	    var plane = new THREE.Mesh(new THREE.PlaneGeometry(width, height), new THREE.MeshLambertMaterial());
+	    var plane = new THREE.Mesh(new THREE.PlaneGeometry(width, height), new THREE.MeshLambertMaterial({ color: 0xffffff }));
 	    return plane;
 	};
 	exports.default = BasePlane;
+
+/***/ },
+/* 335 */
+/***/ function(module, exports) {
+
+	"use strict";
+	
+	Object.defineProperty(exports, "__esModule", {
+	    value: true
+	});
+	var Hero = function Hero() {
+	    var that = new THREE.Mesh(new THREE.ConeGeometry(20, 80, 10), new THREE.MeshLambertMaterial({ color: 0x00ff00 }));
+	    that.castShadow = true;
+	    var head = new THREE.Mesh(new THREE.DodecahedronGeometry(20, 2), new THREE.MeshLambertMaterial({ color: 0x00ff11 }));
+	    head.castShadow = true;
+	    head.position.y = 40;
+	    that.add(head);
+	
+	    that.update = function (dt) {};
+	
+	    that.toReady = function () {
+	        //去准备
+	    };
+	
+	    return that;
+	};
+	exports.default = Hero;
 
 /***/ }
 /******/ ]);
