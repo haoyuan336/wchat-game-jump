@@ -1,4 +1,4 @@
-import {TextSprite, BaseBox, Director} from './../utility/import'
+import {TextSprite, BaseBox, Director, BasePlane} from './../utility/import'
 function GameWorld() {
     let that = {};
     that.scene = new THREE.Scene();
@@ -12,6 +12,14 @@ function GameWorld() {
     that.scene.add(_light);
     _light.position.y = 200;
 
+
+    let _aLight = new THREE.AmbientLight(0xffffff, 0.5);
+    that.scene.add(_aLight);
+
+
+    let _plane = BasePlane(100,100);
+    that.scene.add(_plane);
+    _plane.rotation
 
     let box = BaseBox(100,100,100);
     that.scene.add(box);

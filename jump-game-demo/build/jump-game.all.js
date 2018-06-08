@@ -8930,7 +8930,7 @@
 	Object.defineProperty(exports, "__esModule", {
 	    value: true
 	});
-	exports.BaseBox = exports.TextSprite = exports.BaseScene = exports.Director = undefined;
+	exports.BasePlane = exports.BaseBox = exports.TextSprite = exports.BaseScene = exports.Director = undefined;
 	
 	var _director = __webpack_require__(329);
 	
@@ -8948,12 +8948,17 @@
 	
 	var _baseBox2 = _interopRequireDefault(_baseBox);
 	
+	var _basePlane = __webpack_require__(334);
+	
+	var _basePlane2 = _interopRequireDefault(_basePlane);
+	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
 	exports.Director = _director2.default;
 	exports.BaseScene = _baseScene2.default;
 	exports.TextSprite = _textSprite2.default;
 	exports.BaseBox = _baseBox2.default;
+	exports.BasePlane = _basePlane2.default;
 
 /***/ },
 /* 329 */
@@ -9076,6 +9081,13 @@
 	    that.scene.add(_light);
 	    _light.position.y = 200;
 	
+	    var _aLight = new THREE.AmbientLight(0xffffff, 0.5);
+	    that.scene.add(_aLight);
+	
+	    var _plane = (0, _import.BasePlane)(100, 100);
+	    that.scene.add(_plane);
+	    _plane.rotation;
+	
 	    var box = (0, _import.BaseBox)(100, 100, 100);
 	    that.scene.add(box);
 	
@@ -9148,6 +9160,21 @@
 	    return that;
 	}
 	exports.default = BaseBox;
+
+/***/ },
+/* 334 */
+/***/ function(module, exports) {
+
+	"use strict";
+	
+	Object.defineProperty(exports, "__esModule", {
+	    value: true
+	});
+	var BasePlane = function BasePlane(width, height) {
+	    var plane = new THREE.Mesh(new THREE.PlaneGeometry(width, height), new THREE.MeshLambertMaterial());
+	    return plane;
+	};
+	exports.default = BasePlane;
 
 /***/ }
 /******/ ]);
