@@ -21,6 +21,7 @@ const Director = function () {
             _renderer.render(_runningWorld.scene, _camera);
             _runningWorld.update(dt);
         }
+        TWEEN.update();
         requestAnimationFrame(animate);
     };
     animate();

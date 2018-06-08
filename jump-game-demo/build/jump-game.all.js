@@ -8907,7 +8907,7 @@
 	
 	var _import = __webpack_require__(328);
 	
-	var _gameWorld = __webpack_require__(331);
+	var _gameWorld = __webpack_require__(334);
 	
 	var _gameWorld2 = _interopRequireDefault(_gameWorld);
 	
@@ -8940,15 +8940,15 @@
 	
 	var _baseScene2 = _interopRequireDefault(_baseScene);
 	
-	var _textSprite = __webpack_require__(332);
+	var _textSprite = __webpack_require__(331);
 	
 	var _textSprite2 = _interopRequireDefault(_textSprite);
 	
-	var _baseBox = __webpack_require__(333);
+	var _baseBox = __webpack_require__(332);
 	
 	var _baseBox2 = _interopRequireDefault(_baseBox);
 	
-	var _basePlane = __webpack_require__(334);
+	var _basePlane = __webpack_require__(333);
 	
 	var _basePlane2 = _interopRequireDefault(_basePlane);
 	
@@ -8992,6 +8992,7 @@
 	            _renderer.render(_runningWorld.scene, _camera);
 	            _runningWorld.update(dt);
 	        }
+	        TWEEN.update();
 	        requestAnimationFrame(animate);
 	    };
 	    animate();
@@ -9061,97 +9062,6 @@
 
 /***/ },
 /* 331 */
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-	
-	Object.defineProperty(exports, "__esModule", {
-	    value: true
-	});
-	
-	var _import = __webpack_require__(328);
-	
-	var _hero2 = __webpack_require__(335);
-	
-	var _hero3 = _interopRequireDefault(_hero2);
-	
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-	
-	var GameState = {
-	    Invalide: -1,
-	    Ready: 2,
-	    Running: 3,
-	    GameOver: 4
-	};
-	function GameWorld() {
-	    var that = {};
-	    that.scene = new THREE.Scene();
-	    var _tipsText = (0, _import.TextSprite)('Hello World');
-	    that.scene.add(_tipsText);
-	    _tipsText.position.y = 400;
-	    var _state = GameState.Invalide;
-	
-	    var _light = new THREE.PointLight(0xffffff, 0.8);
-	    _light.castShadow = true;
-	    that.scene.add(_light);
-	    _light.position.y = 300;
-	    _light.position.z = -300;
-	    _light.position.x = 300;
-	
-	    var _aLight = new THREE.AmbientLight(0xffffff, 0.4);
-	    that.scene.add(_aLight);
-	
-	    var _plane = (0, _import.BasePlane)(1000, 1000);
-	    _plane.receiveShadow = true;
-	    that.scene.add(_plane);
-	    _plane.position.y = -25;
-	    _plane.rotation.x = -Math.PI * 0.5;
-	
-	    var box = (0, _import.BaseBox)(100, 50, 100, { color: 0xff00ff });
-	    box.castShadow = true;
-	    box.receiveShadow = true;
-	    that.scene.add(box);
-	
-	    var _hero = (0, _hero3.default)();
-	    that.scene.add(_hero);
-	    _hero.position.y = 60;
-	    _import.Director.shareDirector().setCameraPosition(200, 200, 200);
-	    that.update = function (dt) {};
-	
-	    window.addEventListener('mousedown', function () {
-	        console.log('mouse down');
-	    });
-	    window.addEventListener('mouseup', function () {
-	        console.log('mouse up');
-	    });
-	
-	    var setState = function setState(state) {
-	        if (_state === state) {
-	            return;
-	        }
-	        switch (state) {
-	            case GameState.Ready:
-	                //准备阶段
-	                if (_hero) {
-	                    _hero.toReady();
-	                }
-	
-	                break;
-	            case GameState.Running:
-	                break;
-	            case GameState.GameOver:
-	                break;
-	        }
-	    };
-	
-	    setState(GameState.Ready);
-	
-	    return that;
-	};
-	exports.default = GameWorld;
-
-/***/ },
-/* 332 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -9187,7 +9097,7 @@
 	exports.default = TextSprite;
 
 /***/ },
-/* 333 */
+/* 332 */
 /***/ function(module, exports) {
 
 	"use strict";
@@ -9197,15 +9107,29 @@
 	});
 	function BaseBox(s1, s2, s3, option) {
 	    var box = new THREE.BoxGeometry(s1, s2, s3);
+	
 	    var _material = new THREE.MeshLambertMaterial(option);
 	    var that = new THREE.Mesh(box, _material);
+	    that.castShadow = true;
+	    that.receiveShadow = true;
+	
+	    that.getRect = function () {
+	        //返回矩形
+	        return {
+	            x: that.position.x,
+	            y: that.position.z,
+	            width: s1,
+	            height: s3
+	        };
+	    };
+	
 	    return that;
 	}
 	
 	exports.default = BaseBox;
 
 /***/ },
-/* 334 */
+/* 333 */
 /***/ function(module, exports) {
 
 	"use strict";
@@ -9220,26 +9144,394 @@
 	exports.default = BasePlane;
 
 /***/ },
+/* 334 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	Object.defineProperty(exports, "__esModule", {
+	    value: true
+	});
+	
+	var _import = __webpack_require__(328);
+	
+	var _hero2 = __webpack_require__(335);
+	
+	var _hero3 = _interopRequireDefault(_hero2);
+	
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+	
+	var GameState = {
+	    Invalide: -1,
+	    WaitStart: 1,
+	    Ready: 2,
+	    Running: 3,
+	    GameOvering: 4,
+	    GameOver: 5,
+	    Wining: 6
+	};
+	
+	function GameWorld() {
+	    var that = {};
+	    that.scene = new THREE.Scene();
+	    var _tipsText = (0, _import.TextSprite)('Hello World');
+	    that.scene.add(_tipsText);
+	    _tipsText.position.y = 600;
+	    var _state = GameState.Invalide;
+	    var _score = 0;
+	    var _boxList = [];
+	    var _hero = undefined;
+	
+	    var _left = undefined;
+	
+	    var _light = new THREE.PointLight(0xffffff, 0.8);
+	    _light.castShadow = true;
+	    that.scene.add(_light);
+	    _light.position.y = 300;
+	    _light.position.z = -300;
+	    _light.position.x = 300;
+	
+	    var _aLight = new THREE.AmbientLight(0xffffff, 0.4);
+	    that.scene.add(_aLight);
+	
+	    var _plane = (0, _import.BasePlane)(1000, 1000);
+	    _plane.receiveShadow = true;
+	    that.scene.add(_plane);
+	    _plane.position.y = -25;
+	    _plane.rotation.x = -Math.PI * 0.5;
+	
+	    var createOneBox = function createOneBox() {
+	        console.log('创建一个 箱子');
+	        var color = '#' + (~~(Math.random() * (1 << 24))).toString(16);
+	        console.log('color = ' + color);
+	        var box = (0, _import.BaseBox)(80, 50, 80, { color: color });
+	
+	        if (_boxList.length === 0) {
+	            box.position.set(0, 0, 0);
+	        } else {
+	            var left = Math.random() * 2 - 1 > 0 ? true : false;
+	            _left = left;
+	            // console.log('left = ' + left);
+	            var distance = Math.random() * 50 + 100; //两个box之间的距离
+	            var lastBox = _boxList[_boxList.length - 1];
+	            console.log('last box  position = ' + JSON.stringify(lastBox.position));
+	            if (left) {
+	                box.position.x = lastBox.position.x - distance;
+	                box.position.z = lastBox.position.z;
+	            } else {
+	                box.position.z = lastBox.position.z - distance;
+	                box.position.x = lastBox.position.x;
+	            }
+	        }
+	        _boxList.push(box);
+	        that.scene.add(box);
+	    };
+	
+	    _import.Director.shareDirector().setCameraPosition(200, 200, 200);
+	    that.update = function (dt) {
+	        if (_hero) {
+	            _hero.update(dt);
+	        }
+	    };
+	
+	    window.addEventListener('mousedown', function () {
+	        console.log('mouse down');
+	
+	        if (_state === GameState.Running) {
+	            if (_hero) {
+	                _hero.recPower();
+	            }
+	        }
+	    });
+	    window.addEventListener('mouseup', function () {
+	        console.log('mouse up');
+	
+	        if (_state === GameState.WaitStart) {
+	            setState(GameState.Ready);
+	        } else if (_state === GameState.Running) {
+	            if (_hero) {
+	                _hero.jump(_left, function () {
+	                    console.log('jump end');
+	                    //跳跃结束
+	                    checkLose();
+	                });
+	            }
+	        }
+	        console.log('current state =  ' + _state);
+	    });
+	
+	    var checkLose = function checkLose() {
+	        //检查一下是否胜利失败
+	        var collisionIndex = undefined;
+	        for (var i = 0; i < _boxList.length; i++) {
+	            if (checkCollision(_boxList[i].getRect(), _hero.getPoint())) {
+	                collisionIndex = i;
+	            }
+	        }
+	        if (collisionIndex) {
+	            //跳上了box
+	            //成功了 加分
+	            setState(GameState.Wining);
+	        } else {
+	            //没跳上box
+	            setState(GameState.GameOvering);
+	        }
+	    };
+	    var checkCollision = function checkCollision(rect, point) {
+	
+	        console.log('rect  = ' + JSON.stringify(rect));
+	        console.log('point = ' + JSON.stringify(point));
+	
+	        // rect  = {"x":0,"y":0,"width":80,"height":80}
+	        // point = {"x":-84,"y":0}
+	        // rect  = {"x":-105.64682558782738,"y":0,"width":80,"height":80}
+	        // point = {"x":-84,"y":0}
+	
+	
+	        if (point.x > rect.x - rect.width / 2 && point.x < rect.x + rect.width / 2 && point.y > rect.y - rect.height / 2 && point.y < rect.y + rect.height / 2) {
+	            console.log('碰撞');
+	            return true;
+	        }
+	        console.log('没碰撞');
+	
+	        return false;
+	    };
+	
+	    var moveCamera = function moveCamera(cb) {
+	        var box = _boxList[_boxList.length - 1];
+	        var position = { x: box.position.x, z: box.position.z };
+	        var action = new TWEEN.Tween(position).to({ x: position.x + 200, z: position.z + 200 }, 1000).onUpdate(function () {
+	            _import.Director.shareDirector().setCameraPosition(this.x, 200, this.z);
+	        }).onComplete(function () {
+	            if (cb) {
+	                cb();
+	            }
+	        });
+	        action.start();
+	    };
+	
+	    var setState = function setState(state) {
+	        if (_state === state) {
+	            return;
+	        }
+	        switch (state) {
+	            case GameState.WaitStart:
+	                _score = 0;
+	                _tipsText.setText('Click To Start');
+	
+	                break;
+	            case GameState.Ready:
+	                //准备阶段
+	                for (var i = 0; i < _boxList.length; i++) {
+	                    // that.scene.(_boxList[i]);
+	                    that.scene.remove(_boxList[i]);
+	                }
+	                _boxList = [];
+	                for (var _i = 0; _i < 2; _i++) {
+	                    createOneBox();
+	                }
+	                moveCamera();
+	                console.log('准备');
+	                if (_hero === undefined) {
+	                    _hero = (0, _hero3.default)();
+	                    that.scene.add(_hero);
+	                }
+	
+	                _hero.toReady(function () {
+	                    setState(GameState.Running);
+	                });
+	                break;
+	            case GameState.Running:
+	                console.log('游戏继续运行');
+	                _tipsText.setText('score:' + _score);
+	
+	                break;
+	            case GameState.GameOvering:
+	                setTimeout(function () {
+	                    _hero.goDead(function () {
+	                        setState(GameState.GameOver);
+	                    });
+	                }, 200);
+	
+	                break;
+	            case GameState.GameOver:
+	                _tipsText.setText('GameOver:' + _score);
+	
+	                setTimeout(function () {
+	                    setState(GameState.WaitStart);
+	                }, 1000);
+	
+	                break;
+	            case GameState.Wining:
+	                console.log('胜利中');
+	                _score++;
+	                createOneBox();
+	                moveCamera(function () {
+	                    setState(GameState.Running);
+	                });
+	                break;
+	            default:
+	                break;
+	        }
+	        _state = state;
+	    };
+	
+	    setState(GameState.WaitStart);
+	
+	    return that;
+	};
+	exports.default = GameWorld;
+
+/***/ },
 /* 335 */
 /***/ function(module, exports) {
 
-	"use strict";
+	'use strict';
 	
 	Object.defineProperty(exports, "__esModule", {
 	    value: true
 	});
 	var Hero = function Hero() {
-	    var that = new THREE.Mesh(new THREE.ConeGeometry(20, 80, 10), new THREE.MeshLambertMaterial({ color: 0x00ff00 }));
+	    var HeroState = {
+	        Invalide: -1,
+	        Ready: 1,
+	        RecPower: 2,
+	        Jumping: 3,
+	        JumpEnd: 4
+	    };
+	    var _initY = 65;
+	    var _initHeight = 80;
+	    var _state = HeroState.Invalide;
+	    var that = new THREE.Mesh(new THREE.ConeGeometry(20, _initHeight, 10), new THREE.MeshLambertMaterial({ color: 0x00ff00 }));
 	    that.castShadow = true;
-	    var head = new THREE.Mesh(new THREE.DodecahedronGeometry(20, 2), new THREE.MeshLambertMaterial({ color: 0x00ff11 }));
+	    var head = new THREE.Mesh(new THREE.DodecahedronGeometry(20, 2), new THREE.MeshLambertMaterial({ color: 0xf81f1f }));
 	    head.castShadow = true;
 	    head.position.y = 40;
 	    that.add(head);
 	
-	    that.update = function (dt) {};
+	    var _distance = 0;
+	    var _scale = 1;
 	
-	    that.toReady = function () {
+	    var _left = undefined;
+	
+	    that.update = function (dt) {
+	        if (_state === HeroState.RecPower) {
+	            _distance += 2;
+	            _scale -= 0.008;
+	            if (_scale <= 0.6) {
+	                _scale = 0.6;
+	            }
+	            if (_distance > 300) {
+	                _distance = 300;
+	            }
+	            scaleBody(_scale);
+	        }
+	    };
+	
+	    var scaleBody = function scaleBody(scale) {
+	        //缩放身体
+	        that.scale.y = scale;
+	        that.position.y = _initY + (1 - scale) * _initHeight * -0.5;
+	    };
+	
+	    that.toReady = function (cb) {
 	        //去准备
+	        setState(HeroState.Ready, cb);
+	    };
+	
+	    that.recPower = function () {
+	        //蓄力
+	        if (_state === HeroState.JumpEnd || _state === HeroState.Ready) {
+	            setState(HeroState.RecPower);
+	        }
+	    };
+	    that.jump = function (left, cb) {
+	        //跳
+	        console.log('scale value =' + _scale);
+	        console.log('distance = ' + _distance);
+	        if (_state === HeroState.RecPower) {
+	            _left = left;
+	            setState(HeroState.Jumping, cb);
+	        }
+	    };
+	
+	    var setState = function setState(state, cb) {
+	        if (_state === state) {
+	            return;
+	        }
+	        switch (state) {
+	            case HeroState.Ready:
+	                that.position.y = 120;
+	                that.position.x = 0;
+	                that.position.z = 0;
+	                var action = new TWEEN.Tween({ y: that.position.y }).to({ y: _initY }, 200).onUpdate(function () {
+	                    that.position.y = this.y;
+	                }).onComplete(function () {
+	                    if (cb) {
+	                        cb();
+	                    }
+	                });
+	                action.start();
+	
+	                break;
+	            case HeroState.RecPower:
+	                console.log('蓄力');
+	                break;
+	            case HeroState.Jumping:
+	                _scale = 1;
+	                scaleBody(_scale);
+	                var cp = 0;
+	                if (_left) {
+	                    cp = that.position.x;
+	                } else {
+	                    cp = that.position.z;
+	                }
+	                var jumpAction = new TWEEN.Tween({ r: 0, y: 0, d: cp }).to({ r: -Math.PI * 2, y: Math.PI, d: cp - _distance }, 400).onUpdate(function () {
+	                    // that.rotation.x = this.r;
+	                    that.position.y = Math.sin(this.y) * 100 + _initY;
+	                    if (_left) {
+	                        that.position.x = this.d;
+	                        that.rotation.z = -this.r;
+	                    } else {
+	                        that.rotation.x = this.r;
+	                        that.position.z = this.d;
+	                    }
+	                }).onComplete(function () {
+	                    setState(HeroState.JumpEnd);
+	                    if (cb) {
+	                        cb();
+	                    }
+	                });
+	                // ju
+	                jumpAction.start();
+	
+	                break;
+	            case HeroState.JumpEnd:
+	                _distance = 0;
+	                break;
+	            default:
+	                break;
+	        }
+	        _state = state;
+	    };
+	
+	    that.getPoint = function () {
+	        return {
+	            x: that.position.x,
+	            y: that.position.z
+	        };
+	    };
+	    that.goDead = function (cb) {
+	        //去死
+	
+	        var action = new TWEEN.Tween({ y: _initY }).to({ y: 0 }, 200).onUpdate(function () {
+	            that.position.y = this.y;
+	        }).onComplete(function () {
+	            if (cb) {
+	                cb();
+	            }
+	        });
+	        action.start();
 	    };
 	
 	    return that;
