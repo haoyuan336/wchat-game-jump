@@ -9298,16 +9298,27 @@
 	    };
 	
 	    var moveCamera = function moveCamera(cb) {
-	        var box = _boxList[_boxList.length - 1];
-	        var position = { x: box.position.x, z: box.position.z };
-	        var action = new TWEEN.Tween(position).to({ x: position.x + 200, z: position.z + 200 }, 1000).onUpdate(function () {
-	            _import.Director.shareDirector().setCameraPosition(this.x, 200, this.z);
-	        }).onComplete(function () {
-	            if (cb) {
-	                cb();
-	            }
-	        });
-	        action.start();
+	        // let box = _boxList[_boxList.length - 1];
+	        // console.log('move camera pos = ' + JSON.stringify(box.position));
+	        // let position = {x: box.position.x, z: box.position.z};
+	        // let action = new TWEEN
+	        //     .Tween(position)
+	        //     .to({x: position.x + 200, z: position.z + 200},1000)
+	        //     .onUpdate(function () {
+	        //         Director.shareDirector().setCameraPosition(this.x, 200, this.z);
+	        //     })
+	        //     .onComplete(()=>{
+	        //        if (cb){
+	        //            cb();
+	        //        }
+	        //     });
+	        // action.start();
+	
+	        // let lastBox =
+	        // let action = new TWEEN.Tween({position: x})
+	        // for (let i = 0 ; i < _boxList.length; i ++){
+	        //
+	        // }
 	    };
 	
 	    var setState = function setState(state) {
@@ -9318,10 +9329,6 @@
 	            case GameState.WaitStart:
 	                _score = 0;
 	                _tipsText.setText('Click To Start');
-	
-	                break;
-	            case GameState.Ready:
-	                //准备阶段
 	                for (var i = 0; i < _boxList.length; i++) {
 	                    // that.scene.(_boxList[i]);
 	                    that.scene.remove(_boxList[i]);
@@ -9330,7 +9337,10 @@
 	                for (var _i = 0; _i < 2; _i++) {
 	                    createOneBox();
 	                }
-	                moveCamera();
+	                break;
+	            case GameState.Ready:
+	                //准备阶段
+	
 	                console.log('准备');
 	                if (_hero === undefined) {
 	                    _hero = (0, _hero3.default)();
