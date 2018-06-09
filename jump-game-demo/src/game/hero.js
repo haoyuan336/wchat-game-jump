@@ -23,7 +23,7 @@ const Hero = function () {
     let _targetBox = undefined;
     that.update = function (dt) {
         if (_state === HeroState.RecPower){
-            _distance += 1;
+            _distance += 2;
             _scale -= 0.008;
             if (_scale <= 0.6){
                 _scale = 0.6;
@@ -105,7 +105,7 @@ const Hero = function () {
                 if (_left){
                     endP = {r: -Math.PI * 2, y: Math.PI, x: that.position.x - _distance, z: _targetBox.position.z};
                 }else {
-                    endP = {r: -Math.PI * 2, y: Math.PI, x: _targetBox.position.x , z: _targetBox.position.z - _distance};
+                    endP = {r: -Math.PI * 2, y: Math.PI, x: _targetBox.position.x , z: that.position.z - _distance};
                 }
 
                 const jumpAction = new TWEEN.Tween({r: 0, y: 0, x: that.position.x, z: that.position.z})

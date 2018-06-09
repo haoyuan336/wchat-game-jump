@@ -9310,7 +9310,7 @@
 	        var targetPos = { x: box.position.x, z: box.position.z };
 	
 	        var position = { x: _import.Director.shareDirector().camera.position.x, z: _import.Director.shareDirector().camera.position.z };
-	        var action = new TWEEN.Tween(position).to({ x: targetPos.x + 200, z: targetPos.z + 200 }, 1000).onUpdate(function () {
+	        var action = new TWEEN.Tween(position).to({ x: targetPos.x + 200, z: targetPos.z + 200 }, 200).onUpdate(function () {
 	            _import.Director.shareDirector().setCameraPosition(this.x, 200, this.z);
 	        }).onComplete(function () {
 	            if (cb) {
@@ -9426,7 +9426,7 @@
 	    var _targetBox = undefined;
 	    that.update = function (dt) {
 	        if (_state === HeroState.RecPower) {
-	            _distance += 1;
+	            _distance += 2;
 	            _scale -= 0.008;
 	            if (_scale <= 0.6) {
 	                _scale = 0.6;
@@ -9502,7 +9502,7 @@
 	                if (_left) {
 	                    endP = { r: -Math.PI * 2, y: Math.PI, x: that.position.x - _distance, z: _targetBox.position.z };
 	                } else {
-	                    endP = { r: -Math.PI * 2, y: Math.PI, x: _targetBox.position.x, z: _targetBox.position.z - _distance };
+	                    endP = { r: -Math.PI * 2, y: Math.PI, x: _targetBox.position.x, z: that.position.z - _distance };
 	                }
 	
 	                var jumpAction = new TWEEN.Tween({ r: 0, y: 0, x: that.position.x, z: that.position.z }).to(endP, 400).onUpdate(function () {

@@ -166,7 +166,7 @@ function GameWorld() {
         let position = {x: Director.shareDirector().camera.position.x, z: Director.shareDirector().camera.position.z};
         let action = new TWEEN
             .Tween(position)
-            .to({x: targetPos.x + 200, z:targetPos.z + 200},1000)
+            .to({x: targetPos.x + 200, z:targetPos.z + 200},200)
             .onUpdate(function () {
                 Director.shareDirector().setCameraPosition(this.x, 200, this.z);
             })
