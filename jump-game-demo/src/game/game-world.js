@@ -69,15 +69,22 @@ function GameWorld() {
         }
         _boxList.push(box);
         that.scene.add(box);
+        if (_boxList.length === 7){
+            that.scene.remove(_boxList[0]);
+            _boxList.splice(0,1);
+        }
     };
 
 
 
+    let x = 0;
     Director.shareDirector().setCameraPosition(200, 200, 200);
     that.update = function (dt) {
         if (_hero) {
             _hero.update(dt);
         }
+        x ++;
+        // Director.shareDirector().setCameraPosition(-x, x,0)
     };
 
     window.addEventListener('mousedown', () => {
@@ -98,7 +105,7 @@ function GameWorld() {
             setState(GameState.Ready);
         } else if (_state === GameState.Running) {
             if (_hero) {
-                _hero.jump(_left, () => {
+                _hero.jump(_left, _boxList[_boxList.length - 1], () => {
                     console.log('jump end');
                     //跳跃结束
                     checkLose();
@@ -152,27 +159,23 @@ function GameWorld() {
     };
 
     const moveCamera = function (cb) {
-        // let box = _boxList[_boxList.length - 1];
-        // console.log('move camera pos = ' + JSON.stringify(box.position));
-        // let position = {x: box.position.x, z: box.position.z};
-        // let action = new TWEEN
-        //     .Tween(position)
-        //     .to({x: position.x + 200, z: position.z + 200},1000)
-        //     .onUpdate(function () {
-        //         Director.shareDirector().setCameraPosition(this.x, 200, this.z);
-        //     })
-        //     .onComplete(()=>{
-        //        if (cb){
-        //            cb();
-        //        }
-        //     });
-        // action.start();
+        let box = _boxList[_boxList.length - 1];
+        console.log('move camera pos = ' + JSON.stringify(box.position));
+        let targetPos = {x: box.position.x, z: box.position.z};
 
-        // let lastBox =
-        // let action = new TWEEN.Tween({position: x})
-        // for (let i = 0 ; i < _boxList.length; i ++){
-        //
-        // }
+        let position = {x: Director.shareDirector().camera.position.x, z: Director.shareDirector().camera.position.z};
+        let action = new TWEEN
+            .Tween(position)
+            .to({x: targetPos.x + 200, z:targetPos.z + 200},1000)
+            .onUpdate(function () {
+                Director.shareDirector().setCameraPosition(this.x, 200, this.z);
+            })
+            .onComplete(()=>{
+               if (cb){
+                   cb();
+               }
+            });
+        action.start();
     };
 
 
@@ -192,6 +195,7 @@ function GameWorld() {
                 for (let i = 0; i < 2; i++) {
                     createOneBox();
                 }
+                moveCamera();
                 break;
             case GameState.Ready:
                 //准备阶段

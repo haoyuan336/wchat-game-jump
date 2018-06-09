@@ -20,10 +20,10 @@ const Hero = function () {
     let _scale = 1;
 
     let _left = undefined;
-
+    let _targetBox = undefined;
     that.update = function (dt) {
         if (_state === HeroState.RecPower){
-            _distance += 2;
+            _distance += 1;
             _scale -= 0.008;
             if (_scale <= 0.6){
                 _scale = 0.6;
@@ -55,12 +55,13 @@ const Hero = function () {
 
         }
     };
-    that.jump = function (left, cb) {
+    that.jump = function (left,targetBox, cb) {
         //跳
         console.log('scale value =' + _scale);
         console.log('distance = ' + _distance);
         if (_state === HeroState.RecPower){
             _left = left;
+            _targetBox = targetBox;
             setState(HeroState.Jumping, cb);
         }
     };
@@ -99,18 +100,26 @@ const Hero = function () {
                 }else {
                     cp = that.position.z;
                 }
-                const jumpAction = new TWEEN.Tween({r: 0, y: 0, d: cp})
-                    .to({r: -Math.PI * 2, y: Math.PI, d: cp - _distance}, 400)
+
+                let endP = {};
+                if (_left){
+                    endP = {r: -Math.PI * 2, y: Math.PI, x: that.position.x - _distance, z: _targetBox.position.z};
+                }else {
+                    endP = {r: -Math.PI * 2, y: Math.PI, x: _targetBox.position.x , z: _targetBox.position.z - _distance};
+                }
+
+                const jumpAction = new TWEEN.Tween({r: 0, y: 0, x: that.position.x, z: that.position.z})
+                    .to(endP, 400)
                     .onUpdate(function () {
                         // that.rotation.x = this.r;
                         that.position.y = Math.sin(this.y) * 100 + _initY;
                         if (_left){
-                            that.position.x = this.d;
                             that.rotation.z = -this.r;
                         }else {
                             that.rotation.x = this.r;
-                            that.position.z = this.d;
                         }
+                        that.position.x = this.x;
+                        that.position.z = this.z;
                     })
                     .onComplete(()=>{
                         setState(HeroState.JumpEnd);

@@ -9225,13 +9225,20 @@
 	        }
 	        _boxList.push(box);
 	        that.scene.add(box);
+	        if (_boxList.length === 7) {
+	            that.scene.remove(_boxList[0]);
+	            _boxList.splice(0, 1);
+	        }
 	    };
 	
+	    var x = 0;
 	    _import.Director.shareDirector().setCameraPosition(200, 200, 200);
 	    that.update = function (dt) {
 	        if (_hero) {
 	            _hero.update(dt);
 	        }
+	        x++;
+	        // Director.shareDirector().setCameraPosition(-x, x,0)
 	    };
 	
 	    window.addEventListener('mousedown', function () {
@@ -9250,7 +9257,7 @@
 	            setState(GameState.Ready);
 	        } else if (_state === GameState.Running) {
 	            if (_hero) {
-	                _hero.jump(_left, function () {
+	                _hero.jump(_left, _boxList[_boxList.length - 1], function () {
 	                    console.log('jump end');
 	                    //跳跃结束
 	                    checkLose();
@@ -9298,27 +9305,19 @@
 	    };
 	
 	    var moveCamera = function moveCamera(cb) {
-	        // let box = _boxList[_boxList.length - 1];
-	        // console.log('move camera pos = ' + JSON.stringify(box.position));
-	        // let position = {x: box.position.x, z: box.position.z};
-	        // let action = new TWEEN
-	        //     .Tween(position)
-	        //     .to({x: position.x + 200, z: position.z + 200},1000)
-	        //     .onUpdate(function () {
-	        //         Director.shareDirector().setCameraPosition(this.x, 200, this.z);
-	        //     })
-	        //     .onComplete(()=>{
-	        //        if (cb){
-	        //            cb();
-	        //        }
-	        //     });
-	        // action.start();
+	        var box = _boxList[_boxList.length - 1];
+	        console.log('move camera pos = ' + JSON.stringify(box.position));
+	        var targetPos = { x: box.position.x, z: box.position.z };
 	
-	        // let lastBox =
-	        // let action = new TWEEN.Tween({position: x})
-	        // for (let i = 0 ; i < _boxList.length; i ++){
-	        //
-	        // }
+	        var position = { x: _import.Director.shareDirector().camera.position.x, z: _import.Director.shareDirector().camera.position.z };
+	        var action = new TWEEN.Tween(position).to({ x: targetPos.x + 200, z: targetPos.z + 200 }, 1000).onUpdate(function () {
+	            _import.Director.shareDirector().setCameraPosition(this.x, 200, this.z);
+	        }).onComplete(function () {
+	            if (cb) {
+	                cb();
+	            }
+	        });
+	        action.start();
 	    };
 	
 	    var setState = function setState(state) {
@@ -9337,6 +9336,7 @@
 	                for (var _i = 0; _i < 2; _i++) {
 	                    createOneBox();
 	                }
+	                moveCamera();
 	                break;
 	            case GameState.Ready:
 	                //准备阶段
@@ -9423,10 +9423,10 @@
 	    var _scale = 1;
 	
 	    var _left = undefined;
-	
+	    var _targetBox = undefined;
 	    that.update = function (dt) {
 	        if (_state === HeroState.RecPower) {
-	            _distance += 2;
+	            _distance += 1;
 	            _scale -= 0.008;
 	            if (_scale <= 0.6) {
 	                _scale = 0.6;
@@ -9455,12 +9455,13 @@
 	            setState(HeroState.RecPower);
 	        }
 	    };
-	    that.jump = function (left, cb) {
+	    that.jump = function (left, targetBox, cb) {
 	        //跳
 	        console.log('scale value =' + _scale);
 	        console.log('distance = ' + _distance);
 	        if (_state === HeroState.RecPower) {
 	            _left = left;
+	            _targetBox = targetBox;
 	            setState(HeroState.Jumping, cb);
 	        }
 	    };
@@ -9496,16 +9497,24 @@
 	                } else {
 	                    cp = that.position.z;
 	                }
-	                var jumpAction = new TWEEN.Tween({ r: 0, y: 0, d: cp }).to({ r: -Math.PI * 2, y: Math.PI, d: cp - _distance }, 400).onUpdate(function () {
+	
+	                var endP = {};
+	                if (_left) {
+	                    endP = { r: -Math.PI * 2, y: Math.PI, x: that.position.x - _distance, z: _targetBox.position.z };
+	                } else {
+	                    endP = { r: -Math.PI * 2, y: Math.PI, x: _targetBox.position.x, z: _targetBox.position.z - _distance };
+	                }
+	
+	                var jumpAction = new TWEEN.Tween({ r: 0, y: 0, x: that.position.x, z: that.position.z }).to(endP, 400).onUpdate(function () {
 	                    // that.rotation.x = this.r;
 	                    that.position.y = Math.sin(this.y) * 100 + _initY;
 	                    if (_left) {
-	                        that.position.x = this.d;
 	                        that.rotation.z = -this.r;
 	                    } else {
 	                        that.rotation.x = this.r;
-	                        that.position.z = this.d;
 	                    }
+	                    that.position.x = this.x;
+	                    that.position.z = this.z;
 	                }).onComplete(function () {
 	                    setState(HeroState.JumpEnd);
 	                    if (cb) {
