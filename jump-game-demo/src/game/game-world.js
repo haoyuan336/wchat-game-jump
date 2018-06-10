@@ -27,16 +27,16 @@ function GameWorld() {
     let _light = new THREE.PointLight(0xffffff, 0.8);
     _light.castShadow = true;
     that.scene.add(_light);
-    _light.position.y = 300;
+    _light.position.y = 400;
     _light.position.z = -300;
-    _light.position.x = 300;
+    _light.position.x = 200;
 
 
     let _aLight = new THREE.AmbientLight(0xffffff, 0.4);
     that.scene.add(_aLight);
 
 
-    let _plane = BasePlane(1000, 1000);
+    let _plane = BasePlane(2000, 2000);
     _plane.receiveShadow = true;
     that.scene.add(_plane);
     _plane.position.y = -25;
@@ -69,12 +69,11 @@ function GameWorld() {
         }
         _boxList.push(box);
         that.scene.add(box);
-        if (_boxList.length === 7){
+        if (_boxList.length === 7) {
             that.scene.remove(_boxList[0]);
-            _boxList.splice(0,1);
+            _boxList.splice(0, 1);
         }
     };
-
 
 
     let x = 0;
@@ -83,7 +82,7 @@ function GameWorld() {
         if (_hero) {
             _hero.update(dt);
         }
-        x ++;
+        x++;
         // Director.shareDirector().setCameraPosition(-x, x,0)
     };
 
@@ -109,6 +108,7 @@ function GameWorld() {
                     console.log('jump end');
                     //跳跃结束
                     checkLose();
+                    
                 });
             }
         }
@@ -124,11 +124,17 @@ function GameWorld() {
                 collisionIndex = i;
             }
         }
-        if (collisionIndex) {
+        console.log('collision index = ' + collisionIndex);
+        if (collisionIndex === _boxList.length - 1) {
             //跳上了box
             //成功了 加分
             setState(GameState.Wining);
-        } else {
+        }
+        else if (collisionIndex === _boxList.length - 2){
+
+        }
+        else
+        {
             //没跳上box
             setState(GameState.GameOvering);
         }
@@ -159,6 +165,12 @@ function GameWorld() {
     };
 
     const moveCamera = function (cb) {
+        let firstBox = _boxList[_boxList.length - 2];
+        if (firstBox){
+            _plane.position.set(firstBox.position.x, -25, firstBox.position.z);
+            _light.position.set(firstBox.position.x + 200, 400, firstBox.position.z - 200);
+            // _tipsText.position.set(firstBox.position.x, 600, firstBox.position.z);
+        }
         let box = _boxList[_boxList.length - 1];
         console.log('move camera pos = ' + JSON.stringify(box.position));
         let targetPos = {x: box.position.x, z: box.position.z};
@@ -166,18 +178,27 @@ function GameWorld() {
         let position = {x: Director.shareDirector().camera.position.x, z: Director.shareDirector().camera.position.z};
         let action = new TWEEN
             .Tween(position)
-            .to({x: targetPos.x + 200, z:targetPos.z + 200},200)
+            .to({x: targetPos.x + 200, z: targetPos.z + 200}, 200)
             .onUpdate(function () {
                 Director.shareDirector().setCameraPosition(this.x, 200, this.z);
+                // _tipsText.position.set(Director.shareDirector().camera.position.x, 600, Director.shareDirector().camera.position.z);
+                // _plane.position.set(_hero.position.x, -25, _hero.position.z);
+                // _light.position.set(_hero.position.x + 300, 300, _hero.position.z -300);
+                _tipsText.position.set(this.x, 600, this.z);
+
             })
-            .onComplete(()=>{
-               if (cb){
-                   cb();
-               }
+            .onComplete(()=> {
+                if (cb) {
+                    cb();
+                }
             });
         action.start();
     };
 
+    const movePlaneAndLight = function () {
+        //移动地板 跟灯光
+        // _plane.position.set(_hero.position.x, -25, _hero.position.z);
+    };
 
     const setState = function (state) {
         if (_state === state) {
@@ -187,7 +208,7 @@ function GameWorld() {
             case GameState.WaitStart:
                 _score = 0;
                 _tipsText.setText('Click To Start');
-                for (let i = 0 ; i < _boxList.length ; i ++){
+                for (let i = 0; i < _boxList.length; i++) {
                     // that.scene.(_boxList[i]);
                     that.scene.remove(_boxList[i]);
                 }
@@ -196,6 +217,7 @@ function GameWorld() {
                     createOneBox();
                 }
                 moveCamera();
+                movePlaneAndLight();
                 break;
             case GameState.Ready:
                 //准备阶段
@@ -235,8 +257,8 @@ function GameWorld() {
                 console.log('胜利中');
                 _score++;
                 createOneBox();
-                moveCamera(()=>{
-                   setState(GameState.Running);
+                moveCamera(()=> {
+                    setState(GameState.Running);
                 });
                 break;
             default:

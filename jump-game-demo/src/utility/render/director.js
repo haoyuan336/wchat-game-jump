@@ -6,6 +6,8 @@ const Director = function () {
     let _height = window.innerHeight;
     let _renderer = new THREE.WebGLRenderer();
     _renderer.shadowMap.enabled = true;
+    _renderer.shadowMap.width = 1024;
+    _renderer.shadowMap.height = 1024;
     document.body.appendChild(_renderer.domElement);
     _renderer.setSize(_width, _height);
     let _runningWorld = undefined;
@@ -51,6 +53,9 @@ const Director = function () {
     that.setCameraLookAt = function (pos) {
         _camera.lookAt(pos);
     };
+    that.getCameraPosition = function(){
+        return _camera.position;
+    }
 
     return that;
 };

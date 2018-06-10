@@ -8901,313 +8901,683 @@
 
 /***/ }),
 /* 327 */
+/***/ (function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	var _import = __webpack_require__(328);
+	
+	var _gameWorld = __webpack_require__(334);
+	
+	var _gameWorld2 = _interopRequireDefault(_gameWorld);
+	
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+	
+	window.onload = function () {
+	    console.log('on load');
+	    _import.Director.createDirector();
+	
+	    var gameWorld = (0, _gameWorld2.default)();
+	    _import.Director.shareDirector().startWorld(gameWorld);
+	};
+
+/***/ }),
+/* 328 */
+/***/ (function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	Object.defineProperty(exports, "__esModule", {
+	    value: true
+	});
+	exports.BasePlane = exports.BaseBox = exports.TextSprite = exports.BaseScene = exports.Director = undefined;
+	
+	var _director = __webpack_require__(329);
+	
+	var _director2 = _interopRequireDefault(_director);
+	
+	var _baseScene = __webpack_require__(330);
+	
+	var _baseScene2 = _interopRequireDefault(_baseScene);
+	
+	var _textSprite = __webpack_require__(331);
+	
+	var _textSprite2 = _interopRequireDefault(_textSprite);
+	
+	var _baseBox = __webpack_require__(332);
+	
+	var _baseBox2 = _interopRequireDefault(_baseBox);
+	
+	var _basePlane = __webpack_require__(333);
+	
+	var _basePlane2 = _interopRequireDefault(_basePlane);
+	
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+	
+	exports.Director = _director2.default;
+	exports.BaseScene = _baseScene2.default;
+	exports.TextSprite = _textSprite2.default;
+	exports.BaseBox = _baseBox2.default;
+	exports.BasePlane = _basePlane2.default;
+
+/***/ }),
+/* 329 */
 /***/ (function(module, exports) {
 
 	'use strict';
 	
-	var WIDTH = window.innerWidth;
-	var HEIGHT = window.innerHeight;
-	window.onload = function () {
-	    var GameState = {
-	        Invalide: -1,
-	        Ready: 1,
-	        Running: 2,
-	        GameOver: 3
-	    };
-	
-	    var score = 0;
-	    var state = GameState.Invalide;
-	    var renderer = new THREE.WebGLRenderer();
-	    renderer.shadowMap.enabled = true;
-	    renderer.setSize(WIDTH, HEIGHT);
-	    var isTouching = false;
-	    var moveDistance = 0;
-	    var boxList = [];
-	    var scale = 1;
-	    document.body.appendChild(renderer.domElement);
-	    var scene = new THREE.Scene();
-	
-	    var camera = new THREE.OrthographicCamera(-WIDTH / 2, WIDTH / 2, HEIGHT / 2, -HEIGHT / 2, -1000, 3000);
-	    //
-	    camera.position.y = 100;
-	    camera.position.x = 100;
-	    camera.position.z = 100;
-	    camera.lookAt(scene.position);
-	
-	    var ground = new THREE.Mesh(new THREE.PlaneGeometry(1000, 1000), new THREE.MeshLambertMaterial({ color: 0xffffff }));
-	    scene.add(ground);
-	    ground.receiveShadow = true;
-	    ground.rotation.x = -Math.PI * 0.5;
-	
-	    // let box = createBox();
-	    // scene.add(box);
-	
-	    for (var i = 0; i < 2; i++) {
-	        var box = createBox();
-	        scene.add(box);
-	        box.score = 0;
-	        if (boxList.length !== 0) {
-	            box.position.z = boxList[boxList.length - 1].position.z - 200;
-	            box.score = 1;
-	        }
-	        boxList.push(box);
-	    }
-	
-	    var light = new THREE.PointLight(0xffffff, 0.6);
-	    light.position.y = 300;
-	    light.castShadow = true;
-	    light.position.x = 300;
-	    light.position.z = -300;
-	    scene.add(light);
-	    var aLight = new THREE.AmbientLight(0xffffff, 0.4);
-	    scene.add(aLight);
-	
-	    //
-	    // let text = createText('Are you ready?');
-	    // scene.add(text);
-	    // text.position.z = 100;
-	    // text.position.x = 100;
-	    // text.position.y = 100;
-	    // text.lookAt(camera.position);
-	
-	    var hero = createHero();
-	    scene.add(hero);
-	
-	    var sprite = createSprite('./images/apple_0.png');
-	    scene.add(sprite);
-	
-	    sprite.position.x = 400;
-	    sprite.position.y = 200;
-	    sprite.position.z = 100;
-	
+	Object.defineProperty(exports, "__esModule", {
+	    value: true
+	});
+	// import {BaseScene} from './../import'
+	var Director = function Director() {
+	    console.log('创建导演类');
+	    var that = {};
+	    var _width = window.innerWidth;
+	    var _height = window.innerHeight;
+	    var _renderer = new THREE.WebGLRenderer();
+	    _renderer.shadowMap.enabled = true;
+	    _renderer.shadowMap.width = 1024;
+	    _renderer.shadowMap.height = 1024;
+	    document.body.appendChild(_renderer.domElement);
+	    _renderer.setSize(_width, _height);
+	    var _runningWorld = undefined;
+	    var _camera = new THREE.OrthographicCamera(_width / 2 * -1, _width / 2, _height / 2, _height / 2 * -1, -1000, 10000);
+	    _camera.position.y = 100;
+	    var _currentTime = new Date().getTime();
 	    var animate = function animate() {
-	        renderer.render(scene, camera);
-	        if (state === GameState.Running) {
-	            if (isTouching) {
-	                moveDistance += 4;
-	                scale -= 0.01;
-	                if (scale < 0.6) {
-	                    scale = 0.6;
-	                }
-	                hero.setScale(scale);
-	            }
+	
+	        var nowTime = new Date().getTime();
+	        var dt = nowTime - _currentTime;
+	        _currentTime = nowTime;
+	        if (_runningWorld) {
+	            _renderer.render(_runningWorld.scene, _camera);
+	            _runningWorld.update(dt);
 	        }
 	        TWEEN.update();
 	        requestAnimationFrame(animate);
 	    };
 	    animate();
-	    // text.setText('click start game');
 	
+	    that.startWorld = function (world) {
+	        _runningWorld = world;
+	        _camera.lookAt(world.scene.position);
+	    };
 	
-	    document.addEventListener('mousedown', function () {
-	        console.log('mouse down ');
+	    window.addEventListener('resize', function () {
+	        _width = window.innerWidth;
+	        _height = window.innerHeight;
+	        _renderer.setSize(_width, _height);
+	    });
 	
-	        if (state === GameState.Running) {
-	            isTouching = true;
-	            scale = 1;
+	    Object.defineProperty(that, 'camera', {
+	        get: function get() {
+	            return _camera;
 	        }
 	    });
-	    document.addEventListener('mouseup', function () {
-	        console.log('mouse up');
 	
-	        if (state === GameState.Ready) {
-	            setState(GameState.Running);
-	        } else if (state === GameState.Running) {
-	            isTouching = false;
-	            hero.jump(moveDistance, jumpEnd);
+	    that.setCameraPosition = function (x, y, z) {
+	        _camera.position.x = x;
+	        _camera.position.y = y;
+	        _camera.position.z = z;
+	    };
+	    that.setCameraLookAt = function (pos) {
+	        _camera.lookAt(pos);
+	    };
+	    that.getCameraPosition = function () {
+	        return _camera.position;
+	    };
+	
+	    return that;
+	};
+	
+	var shareDirector = shareDirector || function () {
+	    var that = {};
+	    var _director = undefined;
+	    that.createDirector = function () {
+	        _director = Director();
+	        return _director;
+	    };
+	
+	    that.shareDirector = function () {
+	        if (_director) {
+	            return _director;
 	        }
-	    });
-	    var jumpEnd = function jumpEnd() {
+	        console.error('please create director first!');
+	    };
+	    return that;
+	}();
+	exports.default = shareDirector;
+
+/***/ }),
+/* 330 */
+/***/ (function(module, exports) {
+
+	'use strict';
 	
-	        var boxIndex = undefined;
-	        for (var _i = 0; _i < boxList.length; _i++) {
-	            var pos = boxList[_i].position;
-	            console.log('hero.p.z = ' + hero.position.z);
-	            console.log('pos.z = ' + pos.z);
-	            // if (hero.position.z < pos.z + 50 && hero.position.z > pos.z - 50){
-	            //     console.log('成功');
-	            //     boxIndex = i;
-	            // }
-	            if (hero.position.z < pos.z + 50 && hero.position.z > pos.z - 50) {
-	                console.log('包含' + _i);
-	                boxIndex = _i;
+	function BaseScene() {
+	    var that = new THREE.Scene();
+	    that.destroy = function () {
+	        //
+	        //
+	        console.log('销毁 scene');
+	    };
+	    return that;
+	}
+
+/***/ }),
+/* 331 */
+/***/ (function(module, exports) {
+
+	'use strict';
+	
+	Object.defineProperty(exports, "__esModule", {
+	    value: true
+	});
+	function TextSprite(text) {
+	
+	    var _canvas = document.createElement('Canvas');
+	    _canvas.width = 1024;
+	    _canvas.height = 1024;
+	    var bitmap = _canvas.getContext('2d');
+	    bitmap.font = 'Normal 40px Arial';
+	    bitmap.textAlign = 'center';
+	    bitmap.fillStyle = 'rgba(255,255,255,1)';
+	    bitmap.fillText(text, _canvas.width / 2, _canvas.height / 2);
+	
+	    var _texture = new THREE.Texture(_canvas);
+	    _texture.needsUpdate = true;
+	    var _material = new THREE.SpriteMaterial({ map: _texture, color: 0xffffff });
+	    var that = new THREE.Sprite(_material);
+	
+	    that.setText = function (text) {
+	        bitmap.clearRect(0, 0, _canvas.width, _canvas.height);
+	        bitmap.fillText(text, _canvas.width / 2, _canvas.height);
+	        _texture.needsUpdate = true;
+	    };
+	    that.scale.set(500, 500, 500);
+	
+	    return that;
+	}
+	exports.default = TextSprite;
+
+/***/ }),
+/* 332 */
+/***/ (function(module, exports) {
+
+	"use strict";
+	
+	Object.defineProperty(exports, "__esModule", {
+	    value: true
+	});
+	function BaseBox(s1, s2, s3, option) {
+	    var box = new THREE.BoxGeometry(s1, s2, s3);
+	
+	    var _material = new THREE.MeshLambertMaterial(option);
+	    var that = new THREE.Mesh(box, _material);
+	    that.castShadow = true;
+	    that.receiveShadow = true;
+	
+	    that.getRect = function () {
+	        //返回矩形
+	        return {
+	            x: that.position.x,
+	            y: that.position.z,
+	            width: s1,
+	            height: s3
+	        };
+	    };
+	
+	    return that;
+	}
+	
+	exports.default = BaseBox;
+
+/***/ }),
+/* 333 */
+/***/ (function(module, exports) {
+
+	"use strict";
+	
+	Object.defineProperty(exports, "__esModule", {
+	    value: true
+	});
+	var BasePlane = function BasePlane(width, height) {
+	    var plane = new THREE.Mesh(new THREE.PlaneGeometry(width, height), new THREE.MeshLambertMaterial({ color: 0xffffff }));
+	    return plane;
+	};
+	exports.default = BasePlane;
+
+/***/ }),
+/* 334 */
+/***/ (function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	Object.defineProperty(exports, "__esModule", {
+	    value: true
+	});
+	
+	var _import = __webpack_require__(328);
+	
+	var _hero2 = __webpack_require__(335);
+	
+	var _hero3 = _interopRequireDefault(_hero2);
+	
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+	
+	var GameState = {
+	    Invalide: -1,
+	    WaitStart: 1,
+	    Ready: 2,
+	    Running: 3,
+	    GameOvering: 4,
+	    GameOver: 5,
+	    Wining: 6
+	};
+	
+	function GameWorld() {
+	    var that = {};
+	    that.scene = new THREE.Scene();
+	    var _tipsText = (0, _import.TextSprite)('Hello World');
+	    that.scene.add(_tipsText);
+	    _tipsText.position.y = 600;
+	    var _state = GameState.Invalide;
+	    var _score = 0;
+	    var _boxList = [];
+	    var _hero = undefined;
+	
+	    var _left = undefined;
+	
+	    var _light = new THREE.PointLight(0xffffff, 0.8);
+	    _light.castShadow = true;
+	    that.scene.add(_light);
+	    _light.position.y = 400;
+	    _light.position.z = -300;
+	    _light.position.x = 200;
+	
+	    var _aLight = new THREE.AmbientLight(0xffffff, 0.4);
+	    that.scene.add(_aLight);
+	
+	    var _plane = (0, _import.BasePlane)(2000, 2000);
+	    _plane.receiveShadow = true;
+	    that.scene.add(_plane);
+	    _plane.position.y = -25;
+	    _plane.rotation.x = -Math.PI * 0.5;
+	
+	    var createOneBox = function createOneBox() {
+	        console.log('创建一个 箱子');
+	        var color = '#' + (~~(Math.random() * (1 << 24))).toString(16);
+	        console.log('color = ' + color);
+	        var box = (0, _import.BaseBox)(80, 50, 80, { color: color });
+	
+	        if (_boxList.length === 0) {
+	            box.position.set(0, 0, 0);
+	        } else {
+	            var left = Math.random() * 2 - 1 > 0 ? true : false;
+	            _left = left;
+	            // console.log('left = ' + left);
+	            var distance = Math.random() * 50 + 100; //两个box之间的距离
+	            var lastBox = _boxList[_boxList.length - 1];
+	            console.log('last box  position = ' + JSON.stringify(lastBox.position));
+	            if (left) {
+	                box.position.x = lastBox.position.x - distance;
+	                box.position.z = lastBox.position.z;
+	            } else {
+	                box.position.z = lastBox.position.z - distance;
+	                box.position.x = lastBox.position.x;
 	            }
 	        }
-	        console.log('box index = ' + boxIndex);
-	        if (boxIndex !== undefined) {
-	            console.log('跳跃成功' + boxIndex);
-	            score += boxList[boxIndex].score;
-	            boxList[boxIndex].score = 0;
-	            moveCamera(addBox);
-	        } else {
-	            console.log('跳跃失败');
-	
-	            //跳跃中
-	            hero.toDead(function () {});
+	        _boxList.push(box);
+	        that.scene.add(box);
+	        if (_boxList.length === 7) {
+	            that.scene.remove(_boxList[0]);
+	            _boxList.splice(0, 1);
 	        }
 	    };
 	
-	    var addBox = function addBox() {
-	        //移动摄像机之后 增加一个盒子
-	        var box = boxList[boxList.length - 1];
-	        var newBox = createBox();
-	        scene.add(newBox);
-	        newBox.score = 1;
+	    var x = 0;
+	    _import.Director.shareDirector().setCameraPosition(200, 200, 200);
+	    that.update = function (dt) {
+	        if (_hero) {
+	            _hero.update(dt);
+	        }
+	        x++;
+	        // Director.shareDirector().setCameraPosition(-x, x,0)
 	    };
+	
+	    window.addEventListener('mousedown', function () {
+	        console.log('mouse down');
+	
+	        if (_state === GameState.Running) {
+	            if (_hero) {
+	                _hero.recPower();
+	            }
+	        }
+	    });
+	    window.addEventListener('mouseup', function () {
+	        console.log('mouse up');
+	
+	        if (_state === GameState.WaitStart) {
+	            setState(GameState.Ready);
+	        } else if (_state === GameState.Running) {
+	            if (_hero) {
+	                _hero.jump(_left, _boxList[_boxList.length - 1], function () {
+	                    console.log('jump end');
+	                    //跳跃结束
+	                    checkLose();
+	                });
+	            }
+	        }
+	        console.log('current state =  ' + _state);
+	    });
+	
+	    var checkLose = function checkLose() {
+	        //检查一下是否胜利失败
+	        var collisionIndex = undefined;
+	        for (var i = 0; i < _boxList.length; i++) {
+	            if (checkCollision(_boxList[i].getRect(), _hero.getPoint())) {
+	                collisionIndex = i;
+	            }
+	        }
+	        console.log('collision index = ' + collisionIndex);
+	        if (collisionIndex === _boxList.length - 1) {
+	            //跳上了box
+	            //成功了 加分
+	            setState(GameState.Wining);
+	        } else if (collisionIndex === _boxList.length - 2) {} else {
+	            //没跳上box
+	            setState(GameState.GameOvering);
+	        }
+	    };
+	    var checkCollision = function checkCollision(rect, point) {
+	
+	        console.log('rect  = ' + JSON.stringify(rect));
+	        console.log('point = ' + JSON.stringify(point));
+	
+	        // rect  = {"x":0,"y":0,"width":80,"height":80}
+	        // point = {"x":-84,"y":0}
+	        // rect  = {"x":-105.64682558782738,"y":0,"width":80,"height":80}
+	        // point = {"x":-84,"y":0}
+	
+	
+	        if (point.x > rect.x - rect.width / 2 && point.x < rect.x + rect.width / 2 && point.y > rect.y - rect.height / 2 && point.y < rect.y + rect.height / 2) {
+	            console.log('碰撞');
+	            return true;
+	        }
+	        console.log('没碰撞');
+	
+	        return false;
+	    };
+	
 	    var moveCamera = function moveCamera(cb) {
-	        //移动摄像机到准确的位置
-	        if (cb) {
-	            cb();
+	        var firstBox = _boxList[_boxList.length - 2];
+	        if (firstBox) {
+	            _plane.position.set(firstBox.position.x, -25, firstBox.position.z);
+	            _light.position.set(firstBox.position.x + 200, 400, firstBox.position.z - 200);
+	            // _tipsText.position.set(firstBox.position.x, 600, firstBox.position.z);
 	        }
-	        var box = boxList[boxList.length - 1];
-	        var action = new TWEEN.Tween(camera.position).to({ x: box.position.x + 100, y: box.position.y + 100 }, 200).onComplete(function () {
-	            console.log('move end');
-	            // camera.lookAt(box.position);
-	        });action.start();
+	        var box = _boxList[_boxList.length - 1];
+	        console.log('move camera pos = ' + JSON.stringify(box.position));
+	        var targetPos = { x: box.position.x, z: box.position.z };
+	
+	        var position = { x: _import.Director.shareDirector().camera.position.x, z: _import.Director.shareDirector().camera.position.z };
+	        var action = new TWEEN.Tween(position).to({ x: targetPos.x + 200, z: targetPos.z + 200 }, 200).onUpdate(function () {
+	            _import.Director.shareDirector().setCameraPosition(this.x, 200, this.z);
+	            // _tipsText.position.set(Director.shareDirector().camera.position.x, 600, Director.shareDirector().camera.position.z);
+	            // _plane.position.set(_hero.position.x, -25, _hero.position.z);
+	            // _light.position.set(_hero.position.x + 300, 300, _hero.position.z -300);
+	            _tipsText.position.set(this.x, 600, this.z);
+	        }).onComplete(function () {
+	            if (cb) {
+	                cb();
+	            }
+	        });
+	        action.start();
 	    };
-	    var setState = function setState(pState) {
-	        if (state === pState) {
+	
+	    var movePlaneAndLight = function movePlaneAndLight() {
+	        //移动地板 跟灯光
+	        // _plane.position.set(_hero.position.x, -25, _hero.position.z);
+	    };
+	
+	    var setState = function setState(state) {
+	        if (_state === state) {
 	            return;
 	        }
-	        switch (pState) {
+	        switch (state) {
+	            case GameState.WaitStart:
+	                _score = 0;
+	                _tipsText.setText('Click To Start');
+	                for (var i = 0; i < _boxList.length; i++) {
+	                    // that.scene.(_boxList[i]);
+	                    that.scene.remove(_boxList[i]);
+	                }
+	                _boxList = [];
+	                for (var _i = 0; _i < 2; _i++) {
+	                    createOneBox();
+	                }
+	                moveCamera();
+	                movePlaneAndLight();
+	                break;
 	            case GameState.Ready:
-	                console.log('进入准备状态');
+	                //准备阶段
+	
+	                console.log('准备');
+	                if (_hero === undefined) {
+	                    _hero = (0, _hero3.default)();
+	                    that.scene.add(_hero);
+	                }
+	
+	                _hero.toReady(function () {
+	                    setState(GameState.Running);
+	                });
 	                break;
 	            case GameState.Running:
+	                console.log('游戏继续运行');
+	                _tipsText.setText('score:' + _score);
+	
+	                break;
+	            case GameState.GameOvering:
+	                setTimeout(function () {
+	                    _hero.goDead(function () {
+	                        setState(GameState.GameOver);
+	                    });
+	                }, 200);
+	
 	                break;
 	            case GameState.GameOver:
+	                _tipsText.setText('GameOver:' + _score);
+	
+	                setTimeout(function () {
+	                    setState(GameState.WaitStart);
+	                }, 1000);
+	
+	                break;
+	            case GameState.Wining:
+	                console.log('胜利中');
+	                _score++;
+	                createOneBox();
+	                moveCamera(function () {
+	                    setState(GameState.Running);
+	                });
 	                break;
 	            default:
 	                break;
 	        }
-	        state = pState;
+	        _state = state;
 	    };
 	
-	    setState(GameState.Ready);
-	};
-	var createSprite = function createSprite(resPath) {
-	    //加一个精灵
-	    console.log('create sprite with  ' + resPath);
+	    setState(GameState.WaitStart);
 	
-	    var spriteMap = new THREE.TextureLoader().load(resPath);
-	    var spriteMaterial = new THREE.SpriteMaterial({ map: spriteMap, color: 0xffffff });
-	    var sprite = new THREE.Sprite(spriteMaterial);
-	    return sprite;
+	    return that;
 	};
-	var createText = function createText(text) {
-	    // let canvas = document.createElement('Canvas');
-	    // canvas.width = 1024;
-	    // canvas.height = 512;
-	    // let bitmap = canvas.getContext('2d');
-	    // bitmap.font = 'Normal 40px Arial';
-	    // bitmap.textAlign = 'center';
-	    // bitmap.fillStyle = 'rgba(255,255,255,0.75)';
-	    // bitmap.fillText(text, WIDTH / 2, HEIGHT / 2);
-	    // let texture = new THREE.Texture(canvas);
-	    // texture.needsUpdate = true;
-	    // let material = new THREE.MeshBasicMaterial({map: texture});
-	    // material.transparent = true;
-	    // // let planeGeometry = new THREE.PlaneGeometry(WIDTH, HEIGHT);
-	    // // let plane = new THREE.Mesh(planeGeometry, material);
-	    // let plane = new THREE.Sprite(material);
-	    //
-	    // // plane.rotation.y =  Math.PI * 0.5;
-	    // plane.setText = function (text) {
-	    //     bitmap.clearRect(0, 0, WIDTH, HEIGHT);
-	    //     bitmap.fillText(text, WIDTH / 2, HEIGHT / 2);
-	    //     texture.needsUpdate = true;
-	    // };
-	    // return plane;
+	exports.default = GameWorld;
+
+/***/ }),
+/* 335 */
+/***/ (function(module, exports) {
+
+	'use strict';
 	
-	    // let
-	};
-	var createBox = function createBox() {
-	    var box = new THREE.Mesh(new THREE.BoxGeometry(100, 50, 100), new THREE.MeshLambertMaterial({ color: 0xfcbdbd }));
-	    box.position.y = 25;
-	    box.castShadow = true;
-	    box.receiveShadow = true;
-	    return box;
-	};
-	var createHero = function createHero() {
+	Object.defineProperty(exports, "__esModule", {
+	    value: true
+	});
+	var Hero = function Hero() {
 	    var HeroState = {
 	        Invalide: -1,
 	        Ready: 1,
-	        Jumping: 2,
-	        End: 3,
-	        Dead: 4
+	        RecPower: 2,
+	        Jumping: 3,
+	        JumpEnd: 4
 	    };
-	    var state = HeroState.Invalide;
-	    var cone = new THREE.Mesh(new THREE.ConeGeometry(25, 100, 10, 10), new THREE.MeshLambertMaterial({ color: 0xff7fff }));
-	    var head = new THREE.Mesh(new THREE.DodecahedronGeometry(25, 2), new THREE.MeshLambertMaterial({ color: 0x054742 }));
-	    head.position.y = 50;
+	    var _initY = 65;
+	    var _initHeight = 80;
+	    var _state = HeroState.Invalide;
+	    var that = new THREE.Mesh(new THREE.ConeGeometry(20, _initHeight, 10), new THREE.MeshLambertMaterial({ color: 0x00ff00 }));
+	    that.castShadow = true;
+	    var head = new THREE.Mesh(new THREE.DodecahedronGeometry(20, 2), new THREE.MeshLambertMaterial({ color: 0xf81f1f }));
 	    head.castShadow = true;
-	    cone.add(head);
-	    cone.castShadow = true;
-	    cone.position.y = 100;
-	    var heroHeight = 100;
+	    head.position.y = 40;
+	    that.add(head);
 	
-	    var setState = function setState(pState) {
-	        if (state === pState) {
+	    var _distance = 0;
+	    var _scale = 1;
+	
+	    var _left = undefined;
+	    var _targetBox = undefined;
+	    that.update = function (dt) {
+	        if (_state === HeroState.RecPower) {
+	            _distance += 2;
+	            _scale -= 0.008;
+	            if (_scale <= 0.6) {
+	                _scale = 0.6;
+	            }
+	            if (_distance > 300) {
+	                _distance = 300;
+	            }
+	            scaleBody(_scale);
+	        }
+	    };
+	
+	    var scaleBody = function scaleBody(scale) {
+	        //缩放身体
+	        that.scale.y = scale;
+	        that.position.y = _initY + (1 - scale) * _initHeight * -0.5;
+	    };
+	
+	    that.toReady = function (cb) {
+	        //去准备
+	        setState(HeroState.Ready, cb);
+	    };
+	
+	    that.recPower = function () {
+	        //蓄力
+	        if (_state === HeroState.JumpEnd || _state === HeroState.Ready) {
+	            setState(HeroState.RecPower);
+	        }
+	    };
+	    that.jump = function (left, targetBox, cb) {
+	        //跳
+	        console.log('scale value =' + _scale);
+	        console.log('distance = ' + _distance);
+	        if (_state === HeroState.RecPower) {
+	            _left = left;
+	            _targetBox = targetBox;
+	            setState(HeroState.Jumping, cb);
+	        }
+	    };
+	
+	    var setState = function setState(state, cb) {
+	        if (_state === state) {
 	            return;
 	        }
-	        switch (pState) {
+	        switch (state) {
 	            case HeroState.Ready:
+	                that.position.y = 120;
+	                that.position.x = 0;
+	                that.position.z = 0;
+	                var action = new TWEEN.Tween({ y: that.position.y }).to({ y: _initY }, 200).onUpdate(function () {
+	                    that.position.y = this.y;
+	                }).onComplete(function () {
+	                    if (cb) {
+	                        cb();
+	                    }
+	                });
+	                action.start();
+	
+	                break;
+	            case HeroState.RecPower:
+	                console.log('蓄力');
 	                break;
 	            case HeroState.Jumping:
+	                _scale = 1;
+	                scaleBody(_scale);
+	                var cp = 0;
+	                if (_left) {
+	                    cp = that.position.x;
+	                } else {
+	                    cp = that.position.z;
+	                }
+	
+	                var endP = {};
+	                if (_left) {
+	                    endP = { r: -Math.PI * 2, y: Math.PI, x: that.position.x - _distance, z: _targetBox.position.z };
+	                } else {
+	                    endP = { r: -Math.PI * 2, y: Math.PI, x: _targetBox.position.x, z: that.position.z - _distance };
+	                }
+	
+	                var jumpAction = new TWEEN.Tween({ r: 0, y: 0, x: that.position.x, z: that.position.z }).to(endP, 400).onUpdate(function () {
+	                    // that.rotation.x = this.r;
+	                    that.position.y = Math.sin(this.y) * 100 + _initY;
+	                    if (_left) {
+	                        that.rotation.z = -this.r;
+	                    } else {
+	                        that.rotation.x = this.r;
+	                    }
+	                    that.position.x = this.x;
+	                    that.position.z = this.z;
+	                }).onComplete(function () {
+	                    setState(HeroState.JumpEnd);
+	                    if (cb) {
+	                        cb();
+	                    }
+	                });
+	                // ju
+	                jumpAction.start();
+	
 	                break;
-	            case HeroState.Dead:
-	                break;
-	            case HeroState.End:
+	            case HeroState.JumpEnd:
+	                _distance = 0;
 	                break;
 	            default:
 	                break;
 	        }
-	        state = pState;
+	        _state = state;
 	    };
 	
-	    setState(HeroState.Ready);
+	    that.getPoint = function () {
+	        return {
+	            x: that.position.x,
+	            y: that.position.z
+	        };
+	    };
+	    that.goDead = function (cb) {
+	        //去死
 	
-	    cone.jump = function (distance, cb) {
-	        //跳跃
-	
-	
-	        console.log('jump ' + distance);
-	
-	        if (state === HeroState.Ready) {
-	            console.log('jump' + state);
-	            setState(HeroState.Jumping);
-	            cone.rotation.z = 0;
-	            cone.position.y = 100;
-	            cone.scale.y = 1;
-	            var action = new TWEEN.Tween({ a: 0, y: 0, z: cone.position.z }).to({ a: -Math.PI * 2, y: Math.PI * 0.5, z: cone.position.z - distance }, 300).onUpdate(function () {
-	                cone.rotation.x = this.a;
-	                cone.position.y = 100 + Math.cos(this.y) * 100;
-	                cone.position.z = this.z;
-	            }).onComplete(function () {
-	                if (cb) {
-	                    cb();
-	                }
-	                setState(HeroState.End);
-	            });
-	            action.start();
-	        }
+	        var action = new TWEEN.Tween({ y: _initY }).to({ y: 0 }, 200).onUpdate(function () {
+	            that.position.y = this.y;
+	        }).onComplete(function () {
+	            if (cb) {
+	                cb();
+	            }
+	        });
+	        action.start();
 	    };
 	
-	    cone.setScale = function (scale) {
-	        //
-	        if (state === HeroState.Ready) {
-	            cone.scale.y = scale;
-	            cone.position.y = 100 - heroHeight * (1 - scale) * 0.5;
-	        }
-	    };
-	    cone.toDead = function (cb) {
-	        // let action = new TWEEN.Tween({y: 100});
-	        if (cb) {
-	            cb();
-	        }
-	    };
-	    return cone;
+	    return that;
 	};
+	exports.default = Hero;
 
 /***/ })
 /******/ ]);
