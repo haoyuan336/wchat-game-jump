@@ -16,7 +16,7 @@
   "license": "ISC",
   "dependencies": {
     "three.js": "^0.77.1",
-    "tween.js": "^16.6.0",
+    "tween.js": "tweenjs/tween.js",
     "webpack": "^1.14.0",
     "babel-core": "6.21.0",
     "babel-loader": "6.2.10",
