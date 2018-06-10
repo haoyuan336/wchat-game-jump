@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<script src="lib/three.js"></script>
+<script src="lib/Tween.js"></script>
+<body>
+<script>
+    let renderer = new THREE.WebGLRenderer();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    document.body.appendChild(renderer.domElement);
+    let scene = new THREE.Scene();
+//    let camera = new THREE.PerspectiveCamera(65, window.innerWidth / window.innerHeight, 0.1 , 2000);
+    let camera = new THREE.OrthographicCamera(- window.innerWidth/2, window.innerWidth/2, window.innerHeight/2, - window.innerHeight/2, 0.1, 2000);
+    camera.position.set(200,200,200);
+    camera.lookAt(scene.position);
+    let object = new THREE.Mesh(new THREE.BoxGeometry(100,100,100), new THREE.MeshNormalMaterial());
+
+    let object1 = new THREE.Mesh(new THREE.BoxGeometry(100,100,100), new THREE.MeshLambertMaterial({color: 0xffff00}));
+    object1.position.y = 50;
+    object1.position.x = -50;
+    object1.position.z = 50;
+    scene.add(object1);
+    scene.add(object);
+
+
+    let light = new THREE.PointLight(0xffffff, 10);
+    light.position.y = 200;
+    light.position.z = 200;
+    light.rotation.z = -Math.PI * 0.5;
+    scene.add(light);
+
+
+
+
+
+
+    renderer.render(scene, camera);
+
+</script>
+</body>
+</html>

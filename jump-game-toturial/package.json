@@ -1,0 +1,30 @@
+{
+  "name": "jump-game-demo",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "directories": {
+    "lib": "lib"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "ls"
+  ],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "three.js": "^0.77.1",
+    "tween.js": "tweenjs/tween.js",
+    "webpack": "^1.15.0",
+    "babel-core": "6.21.0",
+    "babel-loader": "6.2.10",
+    "babel-polyfill": "6.20.0",
+    "babel-preset-env": "^1.6.1",
+    "ftp": "^0.3.10",
+    "google-protobuf": "3.3.0",
+    "mp3-duration": "^1.1.0",
+    "request": "^2.83.0"
+  }
+}
