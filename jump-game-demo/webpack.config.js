@@ -18,7 +18,7 @@ module.exports = {
   //入口文件
   entry: [
     "babel-polyfill",
-    entry_path + "/src/main1.js"
+    entry_path + "/src/main.js"
     // entry_path + "/src/m.js"
 
   ],

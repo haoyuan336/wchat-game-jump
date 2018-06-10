@@ -20,6 +20,7 @@ function TextSprite(text) {
         bitmap.fillText(text, _canvas.width /2, _canvas.height);
         _texture.needsUpdate = true;
     };
+    that.scale.set(500,500,500);
 
 
     return that;

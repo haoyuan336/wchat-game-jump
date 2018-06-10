@@ -5,10 +5,12 @@ const Director = function () {
     let _width = window.innerWidth;
     let _height = window.innerHeight;
     let _renderer = new THREE.WebGLRenderer();
+    _renderer.shadowMap.enabled = true;
     document.body.appendChild(_renderer.domElement);
     _renderer.setSize(_width, _height);
     let _runningWorld = undefined;
-    let _camera = new THREE.Camera();
+    let _camera = new THREE.OrthographicCamera(_width/2 * -1 , _width/2 , _height / 2, _height/2 * -1, -1000, 10000);
+    _camera.position.y = 100;
     let _currentTime = new Date().getTime();
     let animate = function(){
 
@@ -19,14 +21,14 @@ const Director = function () {
             _renderer.render(_runningWorld.scene, _camera);
             _runningWorld.update(dt);
         }
-
-
+        TWEEN.update();
         requestAnimationFrame(animate);
     };
     animate();
 
     that.startWorld = function(world){
         _runningWorld = world;
+        _camera.lookAt(world.scene.position);
     };
 
     window.addEventListener('resize', ()=>{
@@ -40,6 +42,16 @@ const Director = function () {
             return _camera
         }
     });
+
+    that.setCameraPosition = function (x,y,z) {
+        _camera.position.x = x;
+        _camera.position.y = y;
+        _camera.position.z = z;
+    };
+    that.setCameraLookAt = function (pos) {
+        _camera.lookAt(pos);
+    };
+
     return that;
 };
 
