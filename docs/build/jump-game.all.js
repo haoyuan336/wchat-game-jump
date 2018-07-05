@@ -8977,6 +8977,8 @@
 	    var _height = window.innerHeight;
 	    var _renderer = new THREE.WebGLRenderer();
 	    _renderer.shadowMap.enabled = true;
+	    _renderer.shadowMap.width = 1024;
+	    _renderer.shadowMap.height = 1024;
 	    document.body.appendChild(_renderer.domElement);
 	    _renderer.setSize(_width, _height);
 	    var _runningWorld = undefined;
@@ -9021,6 +9023,9 @@
 	    };
 	    that.setCameraLookAt = function (pos) {
 	        _camera.lookAt(pos);
+	    };
+	    that.getCameraPosition = function () {
+	        return _camera.position;
 	    };
 	
 	    return that;
@@ -9187,14 +9192,14 @@
 	    var _light = new THREE.PointLight(0xffffff, 0.8);
 	    _light.castShadow = true;
 	    that.scene.add(_light);
-	    _light.position.y = 300;
+	    _light.position.y = 400;
 	    _light.position.z = -300;
-	    _light.position.x = 300;
+	    _light.position.x = 200;
 	
 	    var _aLight = new THREE.AmbientLight(0xffffff, 0.4);
 	    that.scene.add(_aLight);
 	
-	    var _plane = (0, _import.BasePlane)(1000, 1000);
+	    var _plane = (0, _import.BasePlane)(2000, 2000);
 	    _plane.receiveShadow = true;
 	    that.scene.add(_plane);
 	    _plane.position.y = -25;
@@ -9275,11 +9280,12 @@
 	                collisionIndex = i;
 	            }
 	        }
-	        if (collisionIndex) {
+	        console.log('collision index = ' + collisionIndex);
+	        if (collisionIndex === _boxList.length - 1) {
 	            //跳上了box
 	            //成功了 加分
 	            setState(GameState.Wining);
-	        } else {
+	        } else if (collisionIndex === _boxList.length - 2) {} else {
 	            //没跳上box
 	            setState(GameState.GameOvering);
 	        }
@@ -9305,19 +9311,34 @@
 	    };
 	
 	    var moveCamera = function moveCamera(cb) {
+	        var firstBox = _boxList[_boxList.length - 2];
+	        if (firstBox) {
+	            _plane.position.set(firstBox.position.x, -25, firstBox.position.z);
+	            _light.position.set(firstBox.position.x + 200, 400, firstBox.position.z - 200);
+	            // _tipsText.position.set(firstBox.position.x, 600, firstBox.position.z);
+	        }
 	        var box = _boxList[_boxList.length - 1];
 	        console.log('move camera pos = ' + JSON.stringify(box.position));
 	        var targetPos = { x: box.position.x, z: box.position.z };
 	
 	        var position = { x: _import.Director.shareDirector().camera.position.x, z: _import.Director.shareDirector().camera.position.z };
-	        var action = new TWEEN.Tween(position).to({ x: targetPos.x + 200, z: targetPos.z + 200 }, 1000).onUpdate(function () {
+	        var action = new TWEEN.Tween(position).to({ x: targetPos.x + 200, z: targetPos.z + 200 }, 200).onUpdate(function () {
 	            _import.Director.shareDirector().setCameraPosition(this.x, 200, this.z);
+	            // _tipsText.position.set(Director.shareDirector().camera.position.x, 600, Director.shareDirector().camera.position.z);
+	            // _plane.position.set(_hero.position.x, -25, _hero.position.z);
+	            // _light.position.set(_hero.position.x + 300, 300, _hero.position.z -300);
+	            _tipsText.position.set(this.x, 600, this.z);
 	        }).onComplete(function () {
 	            if (cb) {
 	                cb();
 	            }
 	        });
 	        action.start();
+	    };
+	
+	    var movePlaneAndLight = function movePlaneAndLight() {
+	        //移动地板 跟灯光
+	        // _plane.position.set(_hero.position.x, -25, _hero.position.z);
 	    };
 	
 	    var setState = function setState(state) {
@@ -9337,6 +9358,7 @@
 	                    createOneBox();
 	                }
 	                moveCamera();
+	                movePlaneAndLight();
 	                break;
 	            case GameState.Ready:
 	                //准备阶段
@@ -9426,7 +9448,7 @@
 	    var _targetBox = undefined;
 	    that.update = function (dt) {
 	        if (_state === HeroState.RecPower) {
-	            _distance += 1;
+	            _distance += 2;
 	            _scale -= 0.008;
 	            if (_scale <= 0.6) {
 	                _scale = 0.6;
@@ -9502,7 +9524,7 @@
 	                if (_left) {
 	                    endP = { r: -Math.PI * 2, y: Math.PI, x: that.position.x - _distance, z: _targetBox.position.z };
 	                } else {
-	                    endP = { r: -Math.PI * 2, y: Math.PI, x: _targetBox.position.x, z: _targetBox.position.z - _distance };
+	                    endP = { r: -Math.PI * 2, y: Math.PI, x: _targetBox.position.x, z: that.position.z - _distance };
 	                }
 	
 	                var jumpAction = new TWEEN.Tween({ r: 0, y: 0, x: that.position.x, z: that.position.z }).to(endP, 400).onUpdate(function () {
